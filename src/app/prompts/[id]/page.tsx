@@ -1,18 +1,5 @@
+import { promptApi } from "@/lib/api";
 import Image from "next/image";
-import { Prompt } from "@/types";
-import { notFound } from "next/navigation";
-
-async function getPromptDetail(id: string): Promise<Prompt> {
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prompts/${id}`, {
-    cache: "no-store",
-  });
-
-  if (!res.ok) {
-    if (res.status === 404) notFound();
-    throw new Error("데이터를 불러오지 못했습니다.");
-  }
-  return res.json();
-}
 
 export default async function PromptDetailPage({
   params,
@@ -21,7 +8,7 @@ export default async function PromptDetailPage({
 }) {
   const { id } = await params;
 
-  const prompt = await getPromptDetail(id);
+  const prompt = await promptApi.getById(id);
 
   return (
     <main className="max-w-4xl mx-auto p-6">
