@@ -1,14 +1,22 @@
+import PromptActions from "@/app/prompts/[id]/PromptActions";
 import { promptApi } from "@/lib/api";
 import Image from "next/image";
+import { notFound } from "next/navigation";
+
+interface PromptDetailPageProps {
+  params: Promise<{ id: string }>;
+}
 
 export default async function PromptDetailPage({
   params,
-}: {
-  params: { id: string };
-}) {
+}: PromptDetailPageProps) {
   const { id } = await params;
 
   const prompt = await promptApi.getById(id);
+
+  if (!prompt) {
+    notFound();
+  }
 
   return (
     <main className="max-w-4xl mx-auto p-6">
@@ -24,6 +32,9 @@ export default async function PromptDetailPage({
             {prompt.ai_model}
           </span>
         </div>
+
+        {/* 🔽 수정/삭제 버튼 영역 */}
+        <PromptActions promptId={prompt.id} owner={prompt.username} />
       </div>
 
       {/* 이미지 섹션 */}
