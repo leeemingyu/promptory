@@ -1,26 +1,24 @@
 import Link from "next/link";
 
-const page = () => {
-  return (
-    <div>
-      저장된 프롬프트
-      <div>
-        <Link href="/prompt/1" target="_blank">
-          go to prompt 1
-        </Link>
-      </div>
-      <div>
-        <Link href="/prompt/2" target="_blank">
-          go to prompt 2
-        </Link>
-      </div>
-      <div>
-        <Link href="/prompt/3" target="_blank">
-          go to prompt 3
-        </Link>
-      </div>
-    </div>
-  );
-};
+interface SavedPrompt {
+  id: string;
+}
 
-export default page;
+const SAVED_PROMPTS: SavedPrompt[] = [{ id: "1" }, { id: "2" }, { id: "3" }];
+
+export default function SavedPage() {
+  return (
+    <main>
+      <h1>저장한 프롬프트</h1>
+      <div className="mt-4 space-y-2">
+        {SAVED_PROMPTS.map((prompt) => (
+          <div key={prompt.id}>
+            <Link href={`/prompts/${prompt.id}`} target="_blank">
+              go to prompt {prompt.id}
+            </Link>
+          </div>
+        ))}
+      </div>
+    </main>
+  );
+}

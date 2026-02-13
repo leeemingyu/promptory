@@ -1,62 +1,60 @@
-import { Prompt } from "@/types";
+import type { Prompt } from "@/types";
 import Image from "next/image";
 import Link from "next/link";
 
 async function getPrompts(): Promise<Prompt[]> {
   const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/prompts`, {
-    cache: "no-store", // 실시간 데이터 확인을 위해 캐시 방지
+    cache: "no-store",
   });
-  if (!res.ok) throw new Error("데이터를 불러오지 못했습니다.");
-  return res.json();
+
+  if (!res.ok) {
+    throw new Error("프롬프트 목록을 불러오지 못했습니다.");
+  }
+
+  return (await res.json()) as Prompt[];
 }
 
 export default async function HomePage() {
   const prompts = await getPrompts();
 
   return (
-    <main className="max-w-7xl mx-auto p-6">
-      <h1 className="text-3xl font-bold mb-8">🔥 인기 AI 프롬프트</h1>
+    <main className="mx-auto max-w-7xl p-6">
+      <h1 className="mb-8 text-3xl font-bold">인기 AI 프롬프트</h1>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {prompts.map((prompt) => (
           <div
             key={prompt.id}
-            className="border rounded-xl overflow-hidden shadow-sm hover:shadow-md transition"
+            className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md"
           >
             <Link href={`/prompts/${prompt.id}`}>
-              {/* 이미지 영역 */}
-              <div className="aspect-video bg-gray-100 relative">
+              <div className="relative aspect-video bg-gray-100">
                 {prompt.sample_image_url ? (
                   <Image
                     src={prompt.sample_image_url}
                     alt={prompt.title}
                     fill
-                    className="object-cover w-full h-full"
+                    className="h-full w-full object-cover"
                     sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
+                  <div className="flex h-full items-center justify-center text-gray-400">
                     No Image
                   </div>
                 )}
-                <span className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded">
+                <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
                   {prompt.ai_model}
                 </span>
               </div>
 
-              {/* 컨텐츠 영역 */}
               <div className="p-4">
-                <h2 className="font-semibold text-lg truncate">
-                  {prompt.title}
-                </h2>
-                <p className="text-sm text-gray-500 mt-1 line-clamp-2">
+                <h2 className="truncate text-lg font-semibold">{prompt.title}</h2>
+                <p className="mt-1 line-clamp-2 text-sm text-gray-500">
                   {prompt.prompt_text}
                 </p>
-                <div className="mt-4 flex justify-between items-center text-xs text-gray-400">
+                <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
                   <span>By {prompt.username}</span>
-                  <span>
-                    {new Date(prompt.created_at).toLocaleDateString()}
-                  </span>
+                  <span>{new Date(prompt.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </Link>
