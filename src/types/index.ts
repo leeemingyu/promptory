@@ -16,7 +16,7 @@ export interface CreatePromptInput {
   prompt_text: string;
   description: string;
   ai_model: string;
-  sample_image_url?: string;
+  sample_image_url?: string | null;
 }
 
 export type UpdatePromptInput = Partial<CreatePromptInput>;
@@ -40,7 +40,6 @@ export interface PromptActionsProps {
 export interface AuthState {
   user: User | null;
   token: string | null;
-  isLoggedIn: boolean;
   _hasHydrated: boolean;
   setAuth: (user: User | null, token: string | null) => void;
   clearAuth: () => void;

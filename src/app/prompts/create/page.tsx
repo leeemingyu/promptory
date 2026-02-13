@@ -23,7 +23,8 @@ type PromptFormEvent = React.ChangeEvent<
 
 export default function CreatePromptPage() {
   const router = useRouter();
-  const { isLoggedIn, _hasHydrated } = useAuthStore();
+  const { token, _hasHydrated } = useAuthStore();
+  const isLoggedIn = Boolean(token);
 
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -85,7 +86,7 @@ export default function CreatePromptPage() {
 
       const submitData: CreatePromptInput = {
         ...formData,
-        sample_image_url: finalImageUrl,
+        sample_image_url: finalImageUrl || null,
       };
 
       await promptApi.create(submitData);

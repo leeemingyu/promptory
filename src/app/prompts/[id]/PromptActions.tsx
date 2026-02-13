@@ -5,6 +5,9 @@ import { promptApi } from "@/lib/api";
 import { useAuthStore } from "@/store/useAuthStore";
 import type { PromptActionsProps } from "@/types";
 
+const DELETE_CONFIRM_MESSAGE = "정말 삭제하시겠습니까?";
+const DELETE_FAILED_MESSAGE = "삭제에 실패했습니다.";
+
 export default function PromptActions({ promptId, owner }: PromptActionsProps) {
   const router = useRouter();
   const { user } = useAuthStore();
@@ -16,13 +19,15 @@ export default function PromptActions({ promptId, owner }: PromptActionsProps) {
   if (!currentUsername || currentUsername !== owner) return null;
 
   const handleDelete = async () => {
-    if (!confirm("정말 삭제하시겠습니까?")) return;
+    if (!confirm(DELETE_CONFIRM_MESSAGE)) return;
 
     try {
       await promptApi.delete(promptId);
       router.push("/prompts");
-    } catch {
-      alert("삭제에 실패했습니다.");
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : DELETE_FAILED_MESSAGE;
+      alert(message);
     }
   };
 

@@ -1,7 +1,10 @@
 import { supabase } from "./supabase";
 
 export const uploadImage = async (file: File) => {
-  const fileExt = file.name.split(".").pop(); // jpg, png
+  const fileExt = file.name.split(".").pop()?.toLowerCase();
+  if (!fileExt) {
+    throw new Error("유효한 파일 확장자가 없습니다.");
+  }
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
   const { error } = await supabase.storage
