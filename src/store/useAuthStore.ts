@@ -1,21 +1,23 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-interface AuthState {
-  user: any | null;
-  token: string | null;
-  setAuth: (user: any, token: string | null) => void;
-  clearAuth: () => void;
-}
+import type { AuthState } from "@/types";
 
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
       token: null,
-      setAuth: (user, token) => set({ user, token }),
-      clearAuth: () => set({ user: null, token: null }),
+      isLoggedIn: false,
+      _hasHydrated: false,
+      setAuth: (user, token) => set({ user, token, isLoggedIn: !!token }),
+      clearAuth: () => set({ user: null, token: null, isLoggedIn: false }),
+      setHasHydrated: (state) => set({ _hasHydrated: state }),
     }),
-    { name: "auth-storage" },
+    {
+      name: "auth-storage",
+      onRehydrateStorage: () => (state) => {
+        state?.setHasHydrated(true);
+      },
+    },
   ),
 );

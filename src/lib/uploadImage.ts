@@ -1,11 +1,15 @@
 import { supabase } from "./supabase";
 
 export const uploadImage = async (file: File) => {
-  const fileName = `${Date.now()}-${file.name}`;
+  const fileExt = file.name.split(".").pop(); // jpg, png
+  const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-  const { data, error } = await supabase.storage
+  const { error } = await supabase.storage
     .from("prompt-images")
-    .upload(fileName, file);
+    .upload(fileName, file, {
+      cacheControl: "3600",
+      upsert: false,
+    });
 
   if (error) throw error;
 
