@@ -1,9 +1,13 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { signUp } from "@/lib/api";
 import type { RegisterFormData } from "@/types";
+import { createClient } from "@/lib/supabase/client";
+
+const REGISTER_SUCCESS_MESSAGE =
+  "Registration complete. Please check your email and then log in.";
+const REGISTER_FAILED_MESSAGE = "Registration failed. Please try again.";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
@@ -13,6 +17,7 @@ export default function RegisterPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const supabase = createClient();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -23,58 +28,56 @@ export default function RegisterPage() {
     e.preventDefault();
     setIsLoading(true);
 
-    try {
-      const data = await signUp(
-        formData.email,
-        formData.password,
-        formData.username,
-      );
+    const { data, error } = await supabase.auth.signUp({
+      email: formData.email,
+      password: formData.password,
+      options: {
+        emailRedirectTo: "http://localhost:3000/welcome",
+        data: {
+          username: formData.username,
+        },
+      },
+    });
 
-      if (data.user) {
-        alert("회원가입이 완료되었습니다. 로그인해주세요.");
-        router.push("/login");
-      }
-    } catch (error: unknown) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "회원가입에 실패했습니다. 다시 시도해주세요.";
+    if (error || !data.user) {
+      const message = error?.message ?? REGISTER_FAILED_MESSAGE;
       alert(message);
-    } finally {
       setIsLoading(false);
+      return;
     }
+
+    alert(REGISTER_SUCCESS_MESSAGE);
+    router.push("/login");
+    setIsLoading(false);
   };
 
   return (
     <main className="mx-auto mt-20 max-w-md rounded-2xl border p-6 shadow-sm">
-      <h1 className="mb-6 text-2xl font-bold">회원가입</h1>
+      <h1 className="mb-6 text-2xl font-bold">Register</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
           name="username"
-          placeholder="사용자 이름"
+          placeholder="Username"
           value={formData.username}
           className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
-          required
         />
         <input
           type="email"
           name="email"
-          placeholder="이메일"
+          placeholder="Email"
           value={formData.email}
           className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
-          required
         />
         <input
           type="password"
           name="password"
-          placeholder="비밀번호"
+          placeholder="Password"
           value={formData.password}
           className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
-          required
         />
         <button
           type="submit"
@@ -83,7 +86,7 @@ export default function RegisterPage() {
             isLoading ? "cursor-not-allowed opacity-50" : ""
           }`}
         >
-          {isLoading ? "가입 중..." : "가입하기"}
+          {isLoading ? "Registering..." : "Register"}
         </button>
       </form>
     </main>

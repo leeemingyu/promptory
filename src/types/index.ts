@@ -1,9 +1,10 @@
-import type { Session, User } from "@supabase/supabase-js";
+import type { Session } from "@supabase/supabase-js";
 
 export interface Prompt {
   id: string;
   title: string;
   prompt_text: string;
+  description?: string | null;
   ai_model: string;
   username: string;
   sample_image_url?: string | null;
@@ -34,16 +35,7 @@ export interface LoginFormData {
 
 export interface PromptActionsProps {
   promptId: string;
-  owner: string;
-}
-
-export interface AuthState {
-  user: User | null;
-  token: string | null;
-  _hasHydrated: boolean;
-  setAuth: (user: User | null, token: string | null) => void;
-  clearAuth: () => void;
-  setHasHydrated: (state: boolean) => void;
+  canEdit: boolean;
 }
 
 export interface AuthPayload {

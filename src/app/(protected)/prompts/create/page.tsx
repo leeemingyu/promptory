@@ -1,10 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { useAuthStore } from "@/store/useAuthStore";
-import { promptApi } from "@/lib/api";
+import { promptApiClient } from "@/lib/api.client";
 import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
 
@@ -21,11 +20,11 @@ type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 >;
 
+const CREATE_SUCCESS_MESSAGE = "Prompt created successfully.";
+const CREATE_FAILED_MESSAGE = "요청 처리 중 오류가 발생했습니다.";
+
 export default function CreatePromptPage() {
   const router = useRouter();
-  const { token, _hasHydrated } = useAuthStore();
-  const isLoggedIn = Boolean(token);
-
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
@@ -37,17 +36,8 @@ export default function CreatePromptPage() {
   });
 
   useEffect(() => {
-    if (_hasHydrated && !isLoggedIn) {
-      alert("로그인이 필요한 서비스입니다.");
-      router.push("/login");
-    }
-  }, [_hasHydrated, isLoggedIn, router]);
-
-  useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl);
-      }
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [previewUrl]);
 
@@ -57,9 +47,7 @@ export default function CreatePromptPage() {
 
     setImageFile(file);
     setPreviewUrl((prev) => {
-      if (prev) {
-        URL.revokeObjectURL(prev);
-      }
+      if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
     });
   };
@@ -71,60 +59,54 @@ export default function CreatePromptPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!isLoggedIn) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
 
     setIsLoading(true);
 
     try {
       let finalImageUrl = "";
-      if (imageFile) {
-        finalImageUrl = await uploadImage(imageFile);
-      }
+      if (imageFile) finalImageUrl = await uploadImage(imageFile);
 
-      const submitData: CreatePromptInput = {
+      await promptApiClient.create({
         ...formData,
         sample_image_url: finalImageUrl || null,
-      };
+      });
 
-      await promptApi.create(submitData);
-
-      alert("성공적으로 등록되었습니다.");
+      alert(CREATE_SUCCESS_MESSAGE);
       router.push("/");
       router.refresh();
     } catch (error: unknown) {
       const message =
-        error instanceof Error ? error.message : "등록에 실패했습니다.";
+        error instanceof Error ? error.message : CREATE_FAILED_MESSAGE;
       alert(message);
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!_hasHydrated || !isLoggedIn) return null;
-
   return (
-    <main className="mx-auto mt-10 mb-20 max-w-2xl px-4">
-      <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 공유하기</h1>
+    <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
+      <h1 className="mb-8 text-3xl font-bold text-black">Create Prompt</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">제목</label>
+          <label className="mb-2 block font-semibold text-gray-700">
+            Title
+          </label>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             type="text"
-            placeholder="프롬프트 제목을 입력해주세요"
+            placeholder="Enter a title"
             className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
             required
           />
         </div>
 
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">AI 모델</label>
+          <label className="mb-2 block font-semibold text-gray-700">
+            AI Model
+          </label>
           <select
             name="ai_model"
             value={formData.ai_model}
@@ -141,13 +123,13 @@ export default function CreatePromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            프롬프트 내용
+            Prompt
           </label>
           <textarea
             name="prompt_text"
             value={formData.prompt_text}
             onChange={handleChange}
-            placeholder="AI에게 입력한 명령어를 붙여넣어주세요."
+            placeholder="Paste your prompt"
             className="h-40 w-full resize-none rounded-lg border bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -155,20 +137,20 @@ export default function CreatePromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            설명 (선택)
+            Description (Optional)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="프롬프트 팁이나 사용법을 적어주세요."
+            placeholder="Describe how this prompt works"
             className="h-24 w-full resize-none rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
         <div className="rounded-xl border-2 border-dashed border-gray-200 p-6">
           <label className="mb-2 block font-semibold text-gray-700">
-            결과물 이미지
+            Result Image
           </label>
           <input
             type="file"
@@ -180,7 +162,7 @@ export default function CreatePromptPage() {
             <div className="relative mt-4 h-40 w-40">
               <Image
                 src={previewUrl}
-                alt="미리보기"
+                alt="Preview"
                 fill
                 unoptimized
                 className="rounded-lg border object-cover"
@@ -198,9 +180,10 @@ export default function CreatePromptPage() {
               : "bg-black shadow-lg hover:bg-gray-800"
           }`}
         >
-          {isLoading ? "업로드 중..." : "프롬프트 등록하기"}
+          {isLoading ? "Creating.." : "Create Prompt"}
         </button>
       </form>
     </main>
   );
 }
+

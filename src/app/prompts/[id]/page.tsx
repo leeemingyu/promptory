@@ -1,5 +1,5 @@
-import PromptActions from "@/app/prompts/[id]/PromptActions";
-import { promptApi } from "@/lib/api";
+import PromptActionsGate from "@/app/prompts/[id]/PromptActionsGate";
+import { promptApiClient } from "@/lib/api.client";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 
@@ -12,7 +12,7 @@ export default async function PromptDetailPage({
 }: PromptDetailPageProps) {
   const { id } = await params;
 
-  const prompt = await promptApi.getById(id);
+  const prompt = await promptApiClient.getById(id);
 
   if (!prompt) {
     notFound();
@@ -34,7 +34,7 @@ export default async function PromptDetailPage({
         </div>
 
         {/* 🔽 수정/삭제 버튼 영역 */}
-        <PromptActions promptId={prompt.id} owner={prompt.username} />
+        <PromptActionsGate promptId={prompt.id} owner={prompt.username} />
       </div>
 
       {/* 이미지 섹션 */}

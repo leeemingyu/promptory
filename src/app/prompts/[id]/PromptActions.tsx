@@ -1,28 +1,24 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { promptApi } from "@/lib/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import { promptApiClient } from "@/lib/api.client";
 import type { PromptActionsProps } from "@/types";
 
-const DELETE_CONFIRM_MESSAGE = "정말 삭제하시겠습니까?";
-const DELETE_FAILED_MESSAGE = "삭제에 실패했습니다.";
+const DELETE_CONFIRM_MESSAGE = "Delete this prompt?";
+const DELETE_FAILED_MESSAGE = "Failed to delete prompt.";
 
-export default function PromptActions({ promptId, owner }: PromptActionsProps) {
+export default function PromptActions({
+  promptId,
+  canEdit,
+}: PromptActionsProps) {
   const router = useRouter();
-  const { user } = useAuthStore();
-  const currentUsername =
-    typeof user?.user_metadata?.username === "string"
-      ? user.user_metadata.username
-      : null;
-
-  if (!currentUsername || currentUsername !== owner) return null;
+  if (!canEdit) return null;
 
   const handleDelete = async () => {
     if (!confirm(DELETE_CONFIRM_MESSAGE)) return;
 
     try {
-      await promptApi.delete(promptId);
+      await promptApiClient.delete(promptId);
       router.push("/prompts");
     } catch (error: unknown) {
       const message =
@@ -41,13 +37,13 @@ export default function PromptActions({ promptId, owner }: PromptActionsProps) {
         onClick={handleEdit}
         className="rounded border px-3 py-1 text-sm hover:bg-gray-100"
       >
-        수정
+        Edit
       </button>
       <button
         onClick={handleDelete}
         className="rounded border px-3 py-1 text-sm text-red-600 hover:bg-red-50"
       >
-        삭제
+        Delete
       </button>
     </div>
   );

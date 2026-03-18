@@ -1,40 +1,17 @@
-"use client";
-
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { signOut } from "@/lib/api";
-import { useAuthStore } from "@/store/useAuthStore";
+import LogoutButton from "@/components/layout/LogoutButton";
+import { createClient } from "@/lib/supabase/server";
 
-export default function Header() {
-  const { user, token, clearAuth, _hasHydrated } = useAuthStore();
-  const router = useRouter();
-  const isLoggedIn = !!token;
+export default async function Header() {
+  const supabase = await createClient();
+
+  const { data } = await supabase.auth.getUser();
+  const user = data.user;
+
   const username =
-    typeof user?.user_metadata?.username === "string"
-      ? user.user_metadata.username
-      : user?.email ?? "";
-
-  const handleLogout = async () => {
-    try {
-      await signOut();
-      clearAuth();
-      router.refresh();
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
-  if (!_hasHydrated) {
-    return (
-      <header className="flex h-16 items-center border-b bg-white px-4">
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
-          <Link href="/" className="text-xl font-bold">
-            PROMPTORY
-          </Link>
-        </div>
-      </header>
-    );
-  }
+    typeof user?.user_metadata?.nickname === "string"
+      ? user.user_metadata.nickname
+      : (user?.email ?? "");
 
   return (
     <header className="border-b bg-white">
@@ -44,21 +21,18 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          {isLoggedIn ? (
+          {user ? (
             <>
-              <span className="text-sm font-medium">{username.split("@")[0]}님</span>
+              <span className="text-sm font-medium">
+                {username.split("@")[0]}
+              </span>
               <Link
                 href="/prompts/create"
                 className="rounded bg-black px-3 py-1.5 text-sm text-white hover:bg-gray-800"
               >
-                등록
+                Create
               </Link>
-              <button
-                onClick={handleLogout}
-                className="text-sm text-gray-500 hover:text-red-500"
-              >
-                로그아웃
-              </button>
+              <LogoutButton />
             </>
           ) : (
             <>
@@ -66,13 +40,13 @@ export default function Header() {
                 href="/login"
                 className="text-sm font-medium text-gray-600 hover:text-black"
               >
-                로그인
+                Login
               </Link>
               <Link
                 href="/register"
                 className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
               >
-                회원가입
+                Register
               </Link>
             </>
           )}

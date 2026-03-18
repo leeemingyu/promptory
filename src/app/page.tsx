@@ -48,13 +48,12 @@ export default async function HomePage() {
               </div>
 
               <div className="p-4">
-                <h2 className="truncate text-lg font-semibold">{prompt.title}</h2>
-                <p className="mt-1 line-clamp-2 text-sm text-gray-500">
-                  {prompt.prompt_text}
-                </p>
+                <h2 className="truncate text-lg font-semibold">
+                  {prompt.title}
+                </h2>
+
                 <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
                   <span>By {prompt.username}</span>
-                  <span>{new Date(prompt.created_at).toLocaleDateString()}</span>
                 </div>
               </div>
             </Link>
