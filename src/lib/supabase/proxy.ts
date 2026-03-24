@@ -45,6 +45,7 @@ export async function updateSession(request: NextRequest) {
   const isPublicPath =
     pathname === "/" ||
     pathname === "/login" ||
+    pathname === "/register" ||
     pathname.startsWith("/auth") ||
     pathname === "/prompts" ||
     pathname.startsWith("/prompts/");

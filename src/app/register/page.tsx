@@ -12,7 +12,7 @@ const REGISTER_FAILED_MESSAGE = "Registration failed. Please try again.";
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
-    username: "",
+    nickname: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,7 @@ export default function RegisterPage() {
       options: {
         emailRedirectTo: "http://localhost:3000/welcome",
         data: {
-          username: formData.username,
+          nickname: formData.nickname,
         },
       },
     });
@@ -57,9 +57,9 @@ export default function RegisterPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
+          name="nickname"
+          placeholder="Nickname"
+          value={formData.nickname}
           className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           onChange={handleChange}
         />

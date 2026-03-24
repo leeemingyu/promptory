@@ -19,7 +19,7 @@ export default function PromptActions({
 
     try {
       await promptApiClient.delete(promptId);
-      router.push("/prompts");
+      router.push("/");
     } catch (error: unknown) {
       const message =
         error instanceof Error ? error.message : DELETE_FAILED_MESSAGE;
