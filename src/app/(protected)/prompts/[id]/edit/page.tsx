@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { authApiClient, promptApiClient } from "@/lib/api.client";
+import { promptApiClient } from "@/lib/api.client";
+import { createClient } from "@/lib/supabase/client";
 import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput, Prompt } from "@/types";
 
@@ -32,7 +33,7 @@ export default function EditPromptPage() {
   const promptId = params.id ?? "";
 
   const [isAuthReady, setIsAuthReady] = useState(false);
-  const [currentUsername, setCurrentUsername] = useState<string | null>(null);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,18 +52,16 @@ export default function EditPromptPage() {
 
     const checkAuth = async () => {
       try {
-        const data = await authApiClient.me();
+        const supabase = createClient();
+        const { data } = await supabase.auth.getUser();
+
         if (!isMounted) return;
         if (!data.user) {
           alert(LOGIN_REQUIRED_MESSAGE);
           router.push("/login");
           return;
         }
-        const username =
-          typeof data.user?.user_metadata?.username === "string"
-            ? data.user.user_metadata.username
-            : null;
-        setCurrentUsername(username);
+        setCurrentUserId(data.user.id ?? null);
       } catch {
         if (!isMounted) return;
         alert(LOGIN_REQUIRED_MESSAGE);
@@ -80,7 +79,7 @@ export default function EditPromptPage() {
   }, [router]);
 
   useEffect(() => {
-    if (!isAuthReady || !promptId || !currentUsername) return;
+    if (!isAuthReady || !promptId || !currentUserId) return;
 
     let isMounted = true;
 
@@ -96,10 +95,10 @@ export default function EditPromptPage() {
           return;
         }
 
-        const owner = getPromptOwner(prompt);
-        if (!owner || owner !== currentUsername) {
+        const ownerId = getPromptOwnerId(prompt);
+        if (!ownerId || ownerId !== currentUserId) {
           alert(PERMISSION_DENIED_MESSAGE);
-          router.push(`/prompts/${promptId}`);
+          router.push("/");
           return;
         }
 
@@ -128,7 +127,7 @@ export default function EditPromptPage() {
     return () => {
       isMounted = false;
     };
-  }, [isAuthReady, promptId, currentUsername, router]);
+  }, [isAuthReady, promptId, currentUserId, router]);
 
   useEffect(() => {
     return () => {
@@ -154,7 +153,7 @@ export default function EditPromptPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!currentUsername || !promptId) {
+    if (!currentUserId || !promptId) {
       alert(LOGIN_REQUIRED_MESSAGE);
       return;
     }
@@ -182,7 +181,7 @@ export default function EditPromptPage() {
     }
   };
 
-  if (!isAuthReady || !currentUsername || isFetching) return null;
+  if (!isAuthReady || !currentUserId || isFetching) return null;
 
   return (
     <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
@@ -190,7 +189,9 @@ export default function EditPromptPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">Title</label>
+          <label className="mb-2 block font-semibold text-gray-700">
+            Title
+          </label>
           <input
             name="title"
             value={formData.title}
@@ -203,7 +204,9 @@ export default function EditPromptPage() {
         </div>
 
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">AI Model</label>
+          <label className="mb-2 block font-semibold text-gray-700">
+            AI Model
+          </label>
           <select
             name="ai_model"
             value={formData.ai_model}
@@ -219,7 +222,9 @@ export default function EditPromptPage() {
         </div>
 
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">Prompt</label>
+          <label className="mb-2 block font-semibold text-gray-700">
+            Prompt
+          </label>
           <textarea
             name="prompt_text"
             value={formData.prompt_text}
@@ -283,6 +288,6 @@ export default function EditPromptPage() {
   );
 }
 
-function getPromptOwner(prompt: Prompt): string | null {
-  return typeof prompt.username === "string" ? prompt.username : null;
+function getPromptOwnerId(prompt: Prompt): string | null {
+  return typeof prompt.user_id === "string" ? prompt.user_id : null;
 }

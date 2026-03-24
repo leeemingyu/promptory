@@ -138,24 +138,9 @@ export const promptApiClient = {
 
   update: async (id: string, data: UpdatePromptInput): Promise<Prompt> => {
     const response = await authedFetch(`/prompts/${id}`, {
-      method: "PUT",
+      method: "PATCH",
       body: JSON.stringify(data),
     });
     return parseResponse<Prompt>(response);
   },
 };
-
-export interface MeResponse {
-  user: {
-    email?: string | null;
-    user_metadata?: { username?: string };
-  } | null;
-}
-
-export const authApiClient = {
-  me: async (): Promise<MeResponse> => {
-    const response = await authedFetch("/auth/me", { cache: "no-store" });
-    return parseResponse<MeResponse>(response);
-  },
-};
-

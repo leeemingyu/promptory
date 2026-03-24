@@ -2,6 +2,7 @@ import type { Session } from "@supabase/supabase-js";
 
 export interface Prompt {
   id: string;
+  user_id: string;
   title: string;
   prompt_text: string;
   description?: string | null;
@@ -10,6 +11,7 @@ export interface Prompt {
   sample_image_url?: string | null;
   created_at: string;
   instagram_url?: string | null;
+  nickname: string;
 }
 
 export interface CreatePromptInput {

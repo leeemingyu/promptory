@@ -41,7 +41,7 @@ export default async function HomePage() {
                 </h2>
 
                 <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
-                  <span>By {prompt.username}</span>
+                  <span>By {prompt.nickname}</span>
                 </div>
               </div>
             </Link>
