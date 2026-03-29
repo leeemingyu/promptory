@@ -3,7 +3,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { promptApiClient } from "@/lib/api.client";
+import {
+  createPrompt,
+  requireCurrentUser,
+} from "@/lib/data/prompts.client";
+import {
+  CREATE_SUCCESS_MESSAGE,
+  CREATE_FAILED_MESSAGE,
+  LOGIN_REQUIRED_MESSAGE,
+} from "@/lib/data/messages";
 import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
 
@@ -19,9 +27,6 @@ const MODEL_OPTIONS = [
 type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 >;
-
-const CREATE_SUCCESS_MESSAGE = "Prompt created successfully.";
-const CREATE_FAILED_MESSAGE = "요청 처리 중 오류가 발생했습니다.";
 
 export default function CreatePromptPage() {
   const router = useRouter();
@@ -63,18 +68,25 @@ export default function CreatePromptPage() {
     setIsLoading(true);
 
     try {
+      const user = await requireCurrentUser();
+
       let finalImageUrl = "";
       if (imageFile) finalImageUrl = await uploadImage(imageFile);
 
-      await promptApiClient.create({
-        ...formData,
-        sample_image_url: finalImageUrl || null,
+      await createPrompt(formData, {
+        imageUrl: finalImageUrl || null,
+        user,
       });
 
       alert(CREATE_SUCCESS_MESSAGE);
       router.push("/");
       router.refresh();
     } catch (error: unknown) {
+      if (error instanceof Error && error.message === LOGIN_REQUIRED_MESSAGE) {
+        alert(LOGIN_REQUIRED_MESSAGE);
+        router.push("/login");
+        return;
+      }
       const message =
         error instanceof Error ? error.message : CREATE_FAILED_MESSAGE;
       alert(message);
@@ -85,19 +97,19 @@ export default function CreatePromptPage() {
 
   return (
     <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
-      <h1 className="mb-8 text-3xl font-bold text-black">Create Prompt</h1>
+      <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 작성</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Title
+            제목
           </label>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             type="text"
-            placeholder="Enter a title"
+            placeholder="제목을 입력해주세요"
             className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -105,7 +117,7 @@ export default function CreatePromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            AI Model
+            AI 모델
           </label>
           <select
             name="ai_model"
@@ -123,13 +135,13 @@ export default function CreatePromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Prompt
+            프롬프트
           </label>
           <textarea
             name="prompt_text"
             value={formData.prompt_text}
             onChange={handleChange}
-            placeholder="Paste your prompt"
+            placeholder="프롬프트를 입력해주세요"
             className="h-40 w-full resize-none rounded-lg border bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -137,20 +149,20 @@ export default function CreatePromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Description (Optional)
+            설명 (선택)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe how this prompt works"
+            placeholder="프롬프트 설명을 입력해주세요"
             className="h-24 w-full resize-none rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
         <div className="rounded-xl border-2 border-dashed border-gray-200 p-6">
           <label className="mb-2 block font-semibold text-gray-700">
-            Result Image
+            결과 이미지
           </label>
           <input
             type="file"
@@ -174,13 +186,13 @@ export default function CreatePromptPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full rounded-xl py-4 text-lg font-bold text-white transition ${
+          className={`w-full cursor-pointer rounded-xl py-4 text-lg font-bold text-white transition ${
             isLoading
               ? "cursor-not-allowed bg-gray-400"
               : "bg-black shadow-lg hover:bg-gray-800"
           }`}
         >
-          {isLoading ? "Creating.." : "Create Prompt"}
+          {isLoading ? "생성 중..." : "프롬프트 작성"}
         </button>
       </form>
     </main>

@@ -1,12 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { promptApiClient } from "@/lib/api.client";
+import { deletePrompt } from "@/lib/data/prompts.client";
+import { DELETE_FAILED_MESSAGE } from "@/lib/data/messages";
 import type { PromptActionsProps } from "@/types";
 
-const DELETE_CONFIRM_MESSAGE = "Delete this prompt?";
-const DELETE_FAILED_MESSAGE = "Failed to delete prompt.";
-
+const DELETE_CONFIRM_MESSAGE = "이 프롬프트를 삭제할까요?";
 export default function PromptActions({
   promptId,
   canEdit,
@@ -18,7 +17,7 @@ export default function PromptActions({
     if (!confirm(DELETE_CONFIRM_MESSAGE)) return;
 
     try {
-      await promptApiClient.delete(promptId);
+      await deletePrompt(promptId);
       router.push("/");
     } catch (error: unknown) {
       const message =
@@ -35,15 +34,15 @@ export default function PromptActions({
     <div className="flex gap-2">
       <button
         onClick={handleEdit}
-        className="rounded border px-3 py-1 text-sm hover:bg-gray-100"
+        className="cursor-pointer rounded border px-3 py-1 text-sm hover:bg-gray-100"
       >
-        Edit
+        수정
       </button>
       <button
         onClick={handleDelete}
-        className="rounded border px-3 py-1 text-sm text-red-600 hover:bg-red-50"
+        className="cursor-pointer rounded border px-3 py-1 text-sm text-red-600 hover:bg-red-50"
       >
-        Delete
+        삭제
       </button>
     </div>
   );

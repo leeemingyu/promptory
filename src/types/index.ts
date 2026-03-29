@@ -12,6 +12,7 @@ export interface Prompt {
   created_at: string;
   instagram_url?: string | null;
   nickname: string;
+  is_liked?: boolean;
 }
 
 export interface CreatePromptInput {

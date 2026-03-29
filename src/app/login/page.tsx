@@ -4,9 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import type { LoginFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
-
-const LOGIN_SUCCESS_MESSAGE = "Logged in successfully.";
-const LOGIN_FAILED_MESSAGE = "Login failed. Please try again.";
+import {
+  LOGIN_FAILED_MESSAGE,
+  LOGIN_SUCCESS_MESSAGE,
+} from "@/lib/data/messages";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -24,28 +25,32 @@ export default function LoginPage() {
   const signInwithPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: formData.email,
-      password: formData.password,
-    });
-    if (error || !data.user) {
-      const message = error?.message ?? LOGIN_FAILED_MESSAGE;
-      alert(message);
-      return;
-    }
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      if (error || !data.user) {
+        throw new Error(error?.message ?? LOGIN_FAILED_MESSAGE);
+      }
 
-    alert(LOGIN_SUCCESS_MESSAGE);
-    router.push("/");
-    router.refresh();
+      alert(LOGIN_SUCCESS_MESSAGE);
+      router.push("/");
+      router.refresh();
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : LOGIN_FAILED_MESSAGE;
+      alert(message);
+    }
   };
 
   return (
     <main className="mx-auto mt-20 max-w-md rounded-2xl border p-6 shadow-sm">
-      <h1 className="mb-6 text-center text-2xl font-bold">Login</h1>
+      <h1 className="mb-6 text-center text-2xl font-bold">로그인</h1>
       <form onSubmit={signInwithPassword} className="space-y-4">
         <div>
           <label htmlFor="email" className="mb-1 block text-sm font-medium">
-            Email
+            이메일
           </label>
           <input
             id="email"
@@ -60,14 +65,14 @@ export default function LoginPage() {
         </div>
         <div>
           <label htmlFor="password" className="mb-1 block text-sm font-medium">
-            Password
+            비밀번호
           </label>
           <input
             id="password"
             type="password"
             name="password"
             value={formData.password}
-            placeholder="Enter your password"
+            placeholder="비밀번호를 입력해주세요"
             className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-blue-500"
             onChange={handleChange}
             required
@@ -75,9 +80,9 @@ export default function LoginPage() {
         </div>
         <button
           type="submit"
-          className="w-full rounded-lg bg-blue-600 p-3 font-semibold text-white transition hover:bg-blue-700"
+          className="w-full cursor-pointer rounded-lg bg-blue-600 p-3 font-semibold text-white transition hover:bg-blue-700"
         >
-          Login
+          로그인
         </button>
       </form>
     </main>

@@ -3,10 +3,19 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
-import { promptApiClient } from "@/lib/api.client";
-import { createClient } from "@/lib/supabase/client";
+import {
+  getCurrentUserId,
+  getPromptForEdit,
+  requireCurrentUser,
+  updatePrompt,
+} from "@/lib/data/prompts.client";
+import {
+  LOGIN_REQUIRED_MESSAGE,
+  UPDATE_SUCCESS_MESSAGE,
+  UPDATE_FAILED_MESSAGE,
+} from "@/lib/data/messages";
 import { uploadImage } from "@/lib/uploadImage";
-import type { CreatePromptInput, Prompt } from "@/types";
+import type { CreatePromptInput } from "@/types";
 
 const MODEL_OPTIONS = [
   "GPT-4",
@@ -21,12 +30,8 @@ type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 >;
 
-const LOGIN_REQUIRED_MESSAGE = "You need to log in.";
-const PERMISSION_DENIED_MESSAGE = "You can edit only your own prompt.";
-const NOT_FOUND_MESSAGE = "Prompt not found.";
-const UPDATE_SUCCESS_MESSAGE = "Prompt updated successfully.";
-const UPDATE_FAILED_MESSAGE = "Failed to update prompt.";
-
+const PERMISSION_DENIED_MESSAGE = "본인 프롬프트만 수정할 수 있습니다.";
+const NOT_FOUND_MESSAGE = "프롬프트를 찾을 수 없습니다.";
 export default function EditPromptPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -52,16 +57,14 @@ export default function EditPromptPage() {
 
     const checkAuth = async () => {
       try {
-        const supabase = createClient();
-        const { data } = await supabase.auth.getUser();
-
+        const userId = await getCurrentUserId();
         if (!isMounted) return;
-        if (!data.user) {
+        if (!userId) {
           alert(LOGIN_REQUIRED_MESSAGE);
           router.push("/login");
           return;
         }
-        setCurrentUserId(data.user.id ?? null);
+        setCurrentUserId(userId);
       } catch {
         if (!isMounted) return;
         alert(LOGIN_REQUIRED_MESSAGE);
@@ -87,15 +90,14 @@ export default function EditPromptPage() {
       setIsFetching(true);
 
       try {
-        const prompt = await promptApiClient.getById(promptId);
-
-        if (!prompt) {
+        const promptRow = await getPromptForEdit(promptId);
+        if (!promptRow) {
           alert(NOT_FOUND_MESSAGE);
           router.push("/");
           return;
         }
 
-        const ownerId = getPromptOwnerId(prompt);
+        const ownerId = promptRow.user_id;
         if (!ownerId || ownerId !== currentUserId) {
           alert(PERMISSION_DENIED_MESSAGE);
           router.push("/");
@@ -105,13 +107,13 @@ export default function EditPromptPage() {
         if (!isMounted) return;
 
         setFormData({
-          title: prompt.title,
-          prompt_text: prompt.prompt_text,
-          description: prompt.description ?? "",
-          ai_model: prompt.ai_model,
-          sample_image_url: prompt.sample_image_url ?? null,
+          title: promptRow.title,
+          prompt_text: promptRow.prompt_text,
+          description: promptRow.description ?? "",
+          ai_model: promptRow.ai_model,
+          sample_image_url: promptRow.sample_image_url ?? null,
         });
-        setOriginalImageUrl(prompt.sample_image_url ?? "");
+        setOriginalImageUrl(promptRow.sample_image_url ?? "");
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : UPDATE_FAILED_MESSAGE;
@@ -161,12 +163,13 @@ export default function EditPromptPage() {
     setIsLoading(true);
 
     try {
+      const user = await requireCurrentUser();
       let finalImageUrl = originalImageUrl;
       if (imageFile) finalImageUrl = await uploadImage(imageFile);
 
-      await promptApiClient.update(promptId, {
-        ...formData,
-        sample_image_url: finalImageUrl || null,
+      await updatePrompt(promptId, formData, {
+        imageUrl: finalImageUrl || null,
+        userId: user.id,
       });
 
       alert(UPDATE_SUCCESS_MESSAGE);
@@ -185,19 +188,19 @@ export default function EditPromptPage() {
 
   return (
     <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
-      <h1 className="mb-8 text-3xl font-bold text-black">Edit Prompt</h1>
+      <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 수정</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Title
+            제목
           </label>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             type="text"
-            placeholder="Enter a title"
+            placeholder="제목을 입력해주세요"
             className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -205,7 +208,7 @@ export default function EditPromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            AI Model
+            AI 모델
           </label>
           <select
             name="ai_model"
@@ -223,13 +226,13 @@ export default function EditPromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Prompt
+            프롬프트
           </label>
           <textarea
             name="prompt_text"
             value={formData.prompt_text}
             onChange={handleChange}
-            placeholder="Paste your prompt"
+            placeholder="프롬프트를 입력해주세요"
             className="h-40 w-full resize-none rounded-lg border bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-black"
             required
           />
@@ -237,20 +240,20 @@ export default function EditPromptPage() {
 
         <div>
           <label className="mb-2 block font-semibold text-gray-700">
-            Description (Optional)
+            설명 (선택)
           </label>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
-            placeholder="Describe how this prompt works"
+            placeholder="프롬프트 설명을 입력해주세요"
             className="h-24 w-full resize-none rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
           />
         </div>
 
         <div className="rounded-xl border-2 border-dashed border-gray-200 p-6">
           <label className="mb-2 block font-semibold text-gray-700">
-            Result Image
+            결과 이미지
           </label>
           <input
             type="file"
@@ -275,19 +278,15 @@ export default function EditPromptPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className={`w-full rounded-xl py-4 text-lg font-bold text-white transition ${
+          className={`w-full cursor-pointer rounded-xl py-4 text-lg font-bold text-white transition ${
             isLoading
               ? "cursor-not-allowed bg-gray-400"
               : "bg-black shadow-lg hover:bg-gray-800"
           }`}
         >
-          {isLoading ? "Updating.." : "Update Prompt"}
+          {isLoading ? "수정 중..." : "프롬프트 수정"}
         </button>
       </form>
     </main>
   );
-}
-
-function getPromptOwnerId(prompt: Prompt): string | null {
-  return typeof prompt.user_id === "string" ? prompt.user_id : null;
 }

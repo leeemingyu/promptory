@@ -7,11 +7,13 @@ export const uploadImage = async (file: File) => {
   if (!fileExt) {
     throw new Error("유효한 파일 확장자가 없습니다.");
   }
+
   const fileName = `${crypto.randomUUID()}.${fileExt}`;
+  const filePath = `private/${fileName}`;
 
   const { error } = await supabase.storage
     .from("prompt-images")
-    .upload(fileName, file, {
+    .upload(filePath, file, {
       cacheControl: "3600",
       upsert: false,
     });
@@ -20,7 +22,7 @@ export const uploadImage = async (file: File) => {
 
   const {
     data: { publicUrl },
-  } = supabase.storage.from("prompt-images").getPublicUrl(fileName);
+  } = supabase.storage.from("prompt-images").getPublicUrl(filePath);
 
   return publicUrl;
 };

@@ -1,12 +1,14 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 
 export default function WelcomePage() {
   return (
     <main className="mx-auto flex min-h-[70vh] max-w-2xl items-center justify-center p-6">
       <section className="w-full rounded-2xl border bg-white p-8 text-center shadow-sm">
-        <p className="mb-2 text-sm font-medium text-green-600">Email Verified</p>
+        <p className="mb-2 text-sm font-medium text-green-600">
+          이메일 인증 완료
+        </p>
         <h1 className="mb-3 text-3xl font-bold text-gray-900">
-          이메일 인증이 완료됐어요
+          이메일 인증이 완료되었습니다
         </h1>
         <p className="mb-8 text-sm text-gray-600">
           이제 Promptory를 바로 사용할 수 있습니다.

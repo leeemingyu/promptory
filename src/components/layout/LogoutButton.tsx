@@ -12,16 +12,16 @@ export default function LogoutButton() {
       await supabase.auth.signOut();
       router.refresh();
     } catch (error) {
-      console.error("Logout failed:", error);
+      console.error("로그아웃 실패:", error);
     }
   };
 
   return (
     <button
       onClick={handleLogout}
-      className="text-sm text-gray-500 hover:text-red-500"
+      className="cursor-pointer text-sm text-gray-500 hover:text-red-500"
     >
-      Logout
+      로그아웃
     </button>
   );
 }

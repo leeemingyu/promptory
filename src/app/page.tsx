@@ -1,22 +1,40 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
-import { promptApiClient } from "@/lib/api.client";
+import LikeButton from "@/app/prompts/[id]/LikeButton";
+import {
+  getCurrentUserId,
+  getLikedPromptIds,
+  getPrompts,
+} from "@/lib/data/prompts.server";
 
 export default async function HomePage() {
-  const prompts = await promptApiClient.getAll();
+  const prompts = await getPrompts();
+  const currentUserId = await getCurrentUserId();
+  const likedPromptIds = currentUserId
+    ? await getLikedPromptIds(currentUserId)
+    : [];
+  const likedSet = new Set(likedPromptIds);
 
   return (
     <main className="mx-auto max-w-7xl p-6">
       <h1 className="mb-8 text-3xl font-bold">프롬프트 리스트</h1>
 
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {prompts.map((prompt) => (
           <div
             key={prompt.id}
-            className="overflow-hidden rounded-xl border shadow-sm transition hover:shadow-md"
+            className="relative overflow-hidden rounded-xl shadow-sm transition hover:shadow-md"
           >
+            {currentUserId && (
+              <div className="absolute left-2 top-2 z-10">
+                <LikeButton
+                  promptId={prompt.id}
+                  initialLiked={likedSet.has(prompt.id)}
+                />
+              </div>
+            )}
             <Link href={`/prompts/${prompt.id}`}>
-              <div className="relative aspect-video bg-gray-100">
+              <div className="relative aspect-[3/4] bg-gray-100">
                 {prompt.sample_image_url ? (
                   <Image
                     src={prompt.sample_image_url}
@@ -27,7 +45,7 @@ export default async function HomePage() {
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center text-gray-400">
-                    No Image
+                    이미지 없음
                   </div>
                 )}
                 <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
@@ -41,7 +59,7 @@ export default async function HomePage() {
                 </h2>
 
                 <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
-                  <span>By {prompt.nickname}</span>
+                  <span>작성자 {prompt.nickname}</span>
                 </div>
               </div>
             </Link>

@@ -30,7 +30,7 @@ export default async function Header() {
                 href="/prompts/create"
                 className="rounded bg-black px-3 py-1.5 text-sm text-white hover:bg-gray-800"
               >
-                Create
+                작성
               </Link>
               <LogoutButton />
             </>
@@ -40,13 +40,13 @@ export default async function Header() {
                 href="/login"
                 className="text-sm font-medium text-gray-600 hover:text-black"
               >
-                Login
+                로그인
               </Link>
               <Link
                 href="/register"
                 className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
               >
-                Register
+                회원가입
               </Link>
             </>
           )}
