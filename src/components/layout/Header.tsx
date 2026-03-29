@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
 import { createClient } from "@/lib/supabase/server";
 
@@ -15,9 +15,16 @@ export default async function Header() {
 
   return (
     <header className="border-b bg-white">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
+      <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="text-xl font-bold text-black">
           PROMPTORY
+        </Link>
+
+        <Link
+          href="/prompts"
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-700 hover:text-black"
+        >
+          전체 프롬프트
         </Link>
 
         <div className="flex items-center gap-4">

@@ -31,16 +31,39 @@ export async function getCurrentUserId(): Promise<string | null> {
   return data.user?.id ?? null;
 }
 
-export async function getPrompts(
-  sort: PromptSort = "latest",
-): Promise<PromptRow[]> {
+export async function getPrompts(options?: {
+  sort?: PromptSort;
+  query?: string;
+  model?: string;
+  limit?: number;
+}): Promise<PromptRow[]> {
+  const sort = options?.sort ?? "latest";
+  const query = options?.query?.trim();
+  const model = options?.model?.trim();
+  const limit = options?.limit;
   const supabase = await createClient();
-  const { data, error } = await supabase
+  let queryBuilder = supabase
     .from("prompts")
     .select(
       "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
     )
     .order("created_at", { ascending: sort === "oldest" });
+
+  if (query) {
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${query}%,prompt_text.ilike.%${query}%,description.ilike.%${query}%,nickname.ilike.%${query}%`,
+    );
+  }
+
+  if (model) {
+    queryBuilder = queryBuilder.eq("ai_model", model);
+  }
+
+  if (sort !== "popular" && typeof limit === "number") {
+    queryBuilder = queryBuilder.limit(limit);
+  }
+
+  const { data, error } = await queryBuilder;
 
   if (error) {
     logServerError("getPrompts", error);
@@ -52,9 +75,15 @@ export async function getPrompts(
     return prompts;
   }
 
+  if (prompts.length === 0) {
+    return prompts;
+  }
+
+  const promptIds = prompts.map((prompt) => prompt.id);
   const { data: likeRows, error: likeError } = await supabase
     .from("prompt_likes")
-    .select("prompt_id");
+    .select("prompt_id")
+    .in("prompt_id", promptIds);
 
   if (likeError) {
     logServerError("getPrompts/likeCounts", likeError);
@@ -77,7 +106,30 @@ export async function getPrompts(
     );
   });
 
+  if (typeof limit === "number") {
+    return prompts.slice(0, limit);
+  }
+
   return prompts;
+}
+
+export async function getPromptModels(): Promise<string[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("prompts").select("ai_model");
+
+  if (error) {
+    logServerError("getPromptModels", error);
+    return [];
+  }
+
+  const models = new Set<string>();
+  for (const row of data ?? []) {
+    if (typeof row.ai_model === "string" && row.ai_model.trim()) {
+      models.add(row.ai_model);
+    }
+  }
+
+  return Array.from(models).sort((a, b) => a.localeCompare(b));
 }
 
 export async function getPromptById(id: string): Promise<PromptRow | null> {
