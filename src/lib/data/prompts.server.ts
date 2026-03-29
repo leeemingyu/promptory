@@ -15,6 +15,8 @@ type PromptRow = {
   created_at: string;
 };
 
+export type PromptSort = "latest" | "oldest" | "popular";
+
 function logServerError(action: string, error: unknown) {
   console.error(`[prompts.server] ${action}`, error);
 }
@@ -29,21 +31,53 @@ export async function getCurrentUserId(): Promise<string | null> {
   return data.user?.id ?? null;
 }
 
-export async function getPrompts(): Promise<PromptRow[]> {
+export async function getPrompts(
+  sort: PromptSort = "latest",
+): Promise<PromptRow[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("prompts")
     .select(
       "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
     )
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: sort === "oldest" });
 
   if (error) {
     logServerError("getPrompts", error);
     throw new Error(LOAD_FAILED_MESSAGE);
   }
 
-  return data ?? [];
+  let prompts = data ?? [];
+  if (sort !== "popular") {
+    return prompts;
+  }
+
+  const { data: likeRows, error: likeError } = await supabase
+    .from("prompt_likes")
+    .select("prompt_id");
+
+  if (likeError) {
+    logServerError("getPrompts/likeCounts", likeError);
+    return prompts;
+  }
+
+  const likeCountById = new Map<string, number>();
+  for (const row of likeRows ?? []) {
+    const promptId = row.prompt_id;
+    if (typeof promptId !== "string") continue;
+    likeCountById.set(promptId, (likeCountById.get(promptId) ?? 0) + 1);
+  }
+
+  prompts = [...prompts].sort((a, b) => {
+    const aLikes = likeCountById.get(a.id) ?? 0;
+    const bLikes = likeCountById.get(b.id) ?? 0;
+    if (bLikes !== aLikes) return bLikes - aLikes;
+    return (
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  });
+
+  return prompts;
 }
 
 export async function getPromptById(id: string): Promise<PromptRow | null> {

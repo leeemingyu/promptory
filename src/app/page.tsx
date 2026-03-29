@@ -5,19 +5,57 @@ import {
   getCurrentUserId,
   getLikedPromptIds,
   getPrompts,
+  type PromptSort,
 } from "@/lib/data/prompts.server";
 
-export default async function HomePage() {
-  const prompts = await getPrompts();
+type HomePageProps = {
+  searchParams?: Promise<{ sort?: string }>;
+};
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const resolvedParams = await searchParams;
+  const sortParam = resolvedParams?.sort;
+  const sort: PromptSort =
+    sortParam === "popular"
+      ? "popular"
+      : sortParam === "oldest"
+        ? "oldest"
+        : "latest";
+
+  const prompts = await getPrompts(sort);
   const currentUserId = await getCurrentUserId();
   const likedPromptIds = currentUserId
     ? await getLikedPromptIds(currentUserId)
     : [];
   const likedSet = new Set(likedPromptIds);
+  const filters = [
+    { key: "latest", label: "최신순", href: "/" },
+    { key: "popular", label: "인기순", href: "/?sort=popular" },
+    { key: "oldest", label: "오래된순", href: "/?sort=oldest" },
+  ] as const;
 
   return (
     <main className="mx-auto max-w-7xl p-6">
-      <h1 className="mb-8 text-3xl font-bold">프롬프트 리스트</h1>
+      <h1 className="mb-6 text-3xl font-bold">프롬프트 리스트</h1>
+      <div className="mb-8 flex flex-wrap gap-2">
+        {filters.map((filter) => {
+          const isActive = sort === filter.key;
+          return (
+            <Link
+              key={filter.key}
+              href={filter.href}
+              aria-current={isActive ? "page" : undefined}
+              className={`rounded-full border px-3 py-1.5 text-sm transition ${
+                isActive
+                  ? "border-black bg-black text-white"
+                  : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              }`}
+            >
+              {filter.label}
+            </Link>
+          );
+        })}
+      </div>
 
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
         {prompts.map((prompt) => (
