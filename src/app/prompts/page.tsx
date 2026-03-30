@@ -14,6 +14,7 @@ type PromptsPageProps = {
   searchParams?: Promise<{ sort?: string; q?: string; model?: string }>;
 };
 
+// 코드래빗 테스트
 export default async function PromptsPage({ searchParams }: PromptsPageProps) {
   const resolvedParams = await searchParams;
   const sortParam = resolvedParams?.sort;
