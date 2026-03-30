@@ -1,6 +1,8 @@
 ﻿import Image from "next/image";
 import Link from "next/link";
 import LikeButton from "@/app/prompts/[id]/LikeButton";
+import ModelFilter from "@/app/prompts/ModelFilter";
+import SortSelect from "@/app/prompts/SortSelect";
 import {
   getCurrentUserId,
   getLikedPromptIds,
@@ -76,9 +78,10 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
       <form
         method="get"
         action="/prompts"
-        className="mb-8 flex flex-wrap items-center gap-3 rounded-2xl border bg-white p-4"
+        className="mb-6 flex flex-wrap items-center gap-3 rounded-2xl bg-white py-4"
       >
         {modelValue && <input type="hidden" name="model" value={modelValue} />}
+        {sort !== "latest" && <input type="hidden" name="sort" value={sort} />}
         <input
           type="text"
           name="q"
@@ -86,64 +89,46 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
           placeholder="검색어를 입력해주세요"
           className="w-full max-w-sm rounded-lg border px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
         />
-        <select
-          name="sort"
-          defaultValue={sort}
-          className="rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
-        >
-          <option value="latest">최신순</option>
-          <option value="popular">인기순</option>
-          <option value="oldest">오래된순</option>
-        </select>
         <button
           type="submit"
           className="cursor-pointer rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
         >
           검색
         </button>
-        {hasFilters && (
-          <Link
-            href="/prompts"
-            className="rounded-lg border px-4 py-2 text-sm text-gray-600 hover:bg-gray-50"
-          >
-            초기화
-          </Link>
-        )}
       </form>
 
       <div className="grid items-start gap-8 grid-cols-4">
-        <aside className="rounded-2xl border bg-white p-5 col-span-1">
+        <aside className="rounded-2xl bg-white col-span-1">
           <h2 className="text-sm font-semibold text-gray-500">필터</h2>
-          <form method="get" action="/prompts" className="mt-5 space-y-3">
-            {queryValue && <input type="hidden" name="q" value={queryValue} />}
-            {sort !== "latest" && (
-              <input type="hidden" name="sort" value={sort} />
-            )}
+          <div className="mt-5 space-y-3">
             <label className="block text-sm font-semibold text-gray-900">
               AI 모델
             </label>
-            <select
-              name="model"
-              defaultValue={modelValue}
-              className="w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+            <ModelFilter
+              options={modelOptions}
+              value={modelValue}
+              query={queryValue}
+              sort={sort}
+            />
+            <Link
+              href={buildHref({ sort, q: queryValue })}
+              aria-disabled={!modelValue}
+              className={`w-full rounded-lg border px-4 py-2 text-center text-sm font-semibold transition border-gray-300 ${
+                modelValue
+                  ? "cursor-pointer text-gray-700 hover:bg-gray-50"
+                  : "pointer-events-none text-gray-500 opacity-60"
+              }`}
             >
-              <option value="">전체</option>
-              {modelOptions.map((model) => (
-                <option key={model} value={model}>
-                  {model}
-                </option>
-              ))}
-            </select>
-            <button
-              type="submit"
-              className="w-full cursor-pointer rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
-            >
-              적용
-            </button>
-          </form>
+              초기화
+            </Link>
+          </div>
         </aside>
 
         <section className="col-span-3">
+          <div className="mb-8 flex items-center justify-end gap-2 w-full">
+            <span className="text-xs font-semibold text-gray-500">정렬</span>
+            <SortSelect value={sort} query={queryValue} model={modelValue} />
+          </div>
           {prompts.length === 0 ? (
             <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-gray-500">
               조건에 맞는 프롬프트가 없습니다.
