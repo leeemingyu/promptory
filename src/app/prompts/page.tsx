@@ -70,9 +70,6 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
     <main className="mx-auto max-w-7xl p-6">
       <div className="mb-8">
         <h1 className="text-3xl font-bold">전체 프롬프트</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          {prompts.length}개 프롬프트
-        </p>
       </div>
 
       <form
@@ -125,9 +122,12 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         </aside>
 
         <section className="col-span-3">
-          <div className="mb-8 flex items-center justify-end gap-2 w-full">
-            <span className="text-xs font-semibold text-gray-500">정렬</span>
-            <SortSelect value={sort} query={queryValue} model={modelValue} />
+          <div className="mb-4 flex items-center justify-between w-full">
+            <p className="text-sm text-gray-500">{prompts.length}개 프롬프트</p>
+            <div className="flex gap-2 items-center">
+              <span className="text-xs font-semibold text-gray-500">정렬</span>
+              <SortSelect value={sort} query={queryValue} model={modelValue} />
+            </div>
           </div>
           {prompts.length === 0 ? (
             <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-gray-500">

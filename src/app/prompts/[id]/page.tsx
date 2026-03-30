@@ -1,5 +1,6 @@
 ﻿import PromptActions from "@/app/prompts/[id]/PromptActions";
 import LikeButton from "@/app/prompts/[id]/LikeButton";
+import CopyButton from "@/app/prompts/[id]/CopyButton";
 import {
   getCurrentUserId,
   getPromptById,
@@ -80,6 +81,9 @@ export default async function PromptDetailPage({
         <h3 className="text-sm font-semibold text-gray-400 uppercase mb-3">
           프롬프트
         </h3>
+        <div className="absolute right-4 top-4">
+          <CopyButton text={prompt.prompt_text} />
+        </div>
         <p className="text-lg text-gray-800 whitespace-pre-wrap leading-relaxed">
           {prompt.prompt_text}
         </p>
