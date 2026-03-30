@@ -6,6 +6,7 @@ import {
   isPromptLiked,
 } from "@/lib/data/prompts.server";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 
 interface PromptDetailPageProps {
@@ -34,6 +35,14 @@ export default async function PromptDetailPage({
   return (
     <main className="max-w-4xl mx-auto p-6">
       <div className="mb-6">
+        <div className="mb-3">
+          <Link
+            href="/prompts"
+            className="inline-flex items-center rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
+          >
+            목록으로
+          </Link>
+        </div>
         <h1 className="text-3xl font-bold">{prompt.title}</h1>
         <div className="flex items-center gap-2 text-gray-500 mt-2">
           <span>
