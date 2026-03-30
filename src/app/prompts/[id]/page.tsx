@@ -12,12 +12,28 @@ import { notFound } from "next/navigation";
 
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
+  searchParams?: Promise<{ sort?: string; q?: string; model?: string }>;
 }
 
 export default async function PromptDetailPage({
   params,
+  searchParams,
 }: PromptDetailPageProps) {
   const { id } = await params;
+  const resolvedSearchParams = await searchParams;
+  const backParams = new URLSearchParams();
+  if (resolvedSearchParams?.sort) {
+    backParams.set("sort", resolvedSearchParams.sort);
+  }
+  if (resolvedSearchParams?.q) {
+    backParams.set("q", resolvedSearchParams.q);
+  }
+  if (resolvedSearchParams?.model) {
+    backParams.set("model", resolvedSearchParams.model);
+  }
+  const backHref = backParams.toString()
+    ? `/prompts?${backParams.toString()}`
+    : "/prompts";
 
   const promptRow = await getPromptById(id);
   if (!promptRow) {
@@ -38,7 +54,7 @@ export default async function PromptDetailPage({
       <div className="mb-6">
         <div className="mb-3">
           <Link
-            href="/prompts"
+            href={backHref}
             className="inline-flex items-center rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 transition hover:bg-gray-50"
           >
             목록으로

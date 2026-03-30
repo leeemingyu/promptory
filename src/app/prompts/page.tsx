@@ -66,6 +66,15 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
     return qs ? `/prompts?${qs}` : "/prompts";
   };
 
+  const buildDetailHref = (id: string) => {
+    const params = new URLSearchParams();
+    if (sort !== "latest") params.set("sort", sort);
+    if (queryValue) params.set("q", queryValue);
+    if (modelValue) params.set("model", modelValue);
+    const qs = params.toString();
+    return qs ? `/prompts/${id}?${qs}` : `/prompts/${id}`;
+  };
+
   return (
     <main className="mx-auto max-w-7xl p-6">
       <div className="mb-8">
@@ -148,7 +157,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
                       />
                     </div>
                   )}
-                  <Link href={`/prompts/${prompt.id}`}>
+                  <Link href={buildDetailHref(prompt.id)}>
                     <div className="relative aspect-[3/4] bg-gray-100">
                       {prompt.sample_image_url ? (
                         <Image
