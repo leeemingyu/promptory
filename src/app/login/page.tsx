@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,14 @@ export default function LoginPage() {
     email: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const isEmailValid =
+    formData.email.trim().length > 3 &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
+  const isPasswordValid = formData.password.length >= 6;
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const showEmailError = hasSubmitted && !isEmailValid;
+  const showPasswordError = hasSubmitted && !isPasswordValid;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -25,18 +33,22 @@ export default function LoginPage() {
 
   const signInwithPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setHasSubmitted(true);
+    if (!isEmailValid || !isPasswordValid) return;
+    setIsLoading(true);
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
+
       if (error || !data.user) {
         const message =
           error?.status === 429 ||
           error?.message?.toLowerCase().includes("too many")
             ? RATE_LIMIT_MESSAGE
-            : error?.message ?? LOGIN_FAILED_MESSAGE;
+            : (error?.message ?? LOGIN_FAILED_MESSAGE);
         throw new Error(message);
       }
 
@@ -47,13 +59,15 @@ export default function LoginPage() {
       const message =
         error instanceof Error ? error.message : LOGIN_FAILED_MESSAGE;
       alert(message);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
     <main className="mx-auto mt-20 max-w-md rounded-2xl border p-6 shadow-sm">
-      <h1 className="mb-6 text-center text-2xl font-bold">로그인</h1>
-      <form onSubmit={signInwithPassword} className="space-y-4">
+      <h1 className="mb-6 text-2xl font-bold">로그인</h1>
+      <form onSubmit={signInwithPassword} className="space-y-4" noValidate>
         <div>
           <label htmlFor="email" className="mb-1 block text-sm font-medium">
             이메일
@@ -63,11 +77,21 @@ export default function LoginPage() {
             type="email"
             name="email"
             value={formData.email}
-            placeholder="example@email.com"
-            className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="이메일"
+            className={`w-full rounded-lg border p-3 outline-none focus:ring-2 ${
+              showEmailError
+                ? "border-rose-300 focus:ring-rose-200"
+                : formData.email.length > 0
+                  ? "border-emerald-300 focus:ring-emerald-200"
+                  : "border-gray-300 focus:ring-black"
+            }`}
             onChange={handleChange}
-            required
           />
+          {showEmailError && (
+            <p className="mt-2 text-xs text-rose-600">
+              이메일 형식을 확인해주세요.
+            </p>
+          )}
         </div>
         <div>
           <label htmlFor="password" className="mb-1 block text-sm font-medium">
@@ -78,17 +102,32 @@ export default function LoginPage() {
             type="password"
             name="password"
             value={formData.password}
-            placeholder="비밀번호를 입력해주세요"
-            className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="비밀번호 (6자 이상)"
+            className={`w-full rounded-lg border p-3 outline-none focus:ring-2 ${
+              showPasswordError
+                ? "border-rose-300 focus:ring-rose-200"
+                : formData.password.length > 0
+                  ? "border-emerald-300 focus:ring-emerald-200"
+                  : "border-gray-300 focus:ring-black"
+            }`}
             onChange={handleChange}
-            required
           />
+          {showPasswordError && (
+            <p className="mt-2 text-xs text-rose-600">
+              비밀번호는 6자 이상이어야 합니다.
+            </p>
+          )}
         </div>
         <button
           type="submit"
-          className="w-full cursor-pointer rounded-lg bg-blue-600 p-3 font-semibold text-white transition hover:bg-blue-700"
+          disabled={isLoading}
+          className={`w-full rounded-lg p-3 font-semibold text-white transition ${
+            isLoading
+              ? "cursor-not-allowed bg-gray-400 opacity-70"
+              : "cursor-pointer bg-black hover:bg-gray-800"
+          }`}
         >
-          로그인
+          {isLoading ? "로그인 중..." : "로그인"}
         </button>
       </form>
     </main>
