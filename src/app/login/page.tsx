@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LOGIN_FAILED_MESSAGE,
   LOGIN_SUCCESS_MESSAGE,
+  RATE_LIMIT_MESSAGE,
 } from "@/lib/data/messages";
 
 export default function LoginPage() {
@@ -31,7 +32,12 @@ export default function LoginPage() {
         password: formData.password,
       });
       if (error || !data.user) {
-        throw new Error(error?.message ?? LOGIN_FAILED_MESSAGE);
+        const message =
+          error?.status === 429 ||
+          error?.message?.toLowerCase().includes("too many")
+            ? RATE_LIMIT_MESSAGE
+            : error?.message ?? LOGIN_FAILED_MESSAGE;
+        throw new Error(message);
       }
 
       alert(LOGIN_SUCCESS_MESSAGE);
