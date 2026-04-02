@@ -1,4 +1,4 @@
-import type { Session } from "@supabase/supabase-js";
+import type { Session, User } from "@supabase/supabase-js";
 
 export interface Prompt {
   id: string;
@@ -27,7 +27,6 @@ export type UpdatePromptInput = Partial<CreatePromptInput>;
 
 export interface RegisterFormData {
   email: string;
-  nickname: string;
   password: string;
 }
 
