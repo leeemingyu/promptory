@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/client";
 import {
   LOGIN_FAILED_MESSAGE,
   LOGIN_SUCCESS_MESSAGE,
+  EMAIL_NOT_CONFIRMED_MESSAGE,
   RATE_LIMIT_MESSAGE,
 } from "@/lib/data/messages";
 
@@ -45,11 +46,14 @@ export default function LoginPage() {
       });
 
       if (error || !data.user) {
+        const rawMessage = error?.message?.toLowerCase() ?? "";
         const message =
-          error?.status === 429 ||
-          error?.message?.toLowerCase().includes("too many")
-            ? RATE_LIMIT_MESSAGE
-            : (error?.message ?? LOGIN_FAILED_MESSAGE);
+          rawMessage.includes("email not confirmed") ||
+          rawMessage.includes("email_not_confirmed")
+            ? EMAIL_NOT_CONFIRMED_MESSAGE
+            : error?.status === 429 || rawMessage.includes("too many")
+              ? RATE_LIMIT_MESSAGE
+              : (error?.message ?? LOGIN_FAILED_MESSAGE);
         throw new Error(message);
       }
 
