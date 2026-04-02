@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import type { CreatePromptInput } from "@/types";
 import type { User } from "@supabase/supabase-js";
+import { getProfileByUserId } from "@/lib/data/profiles.client";
 import {
   CREATE_FAILED_MESSAGE,
   DELETE_FAILED_MESSAGE,
@@ -72,10 +73,12 @@ export async function createPrompt(
   const supabase = createClient();
   const user = options?.user ?? (await requireCurrentUser());
 
+  const profile = await getProfileByUserId(user.id);
   const nickname =
-    (user.user_metadata?.nickname as string | undefined) ||
-    (user.user_metadata?.name as string | undefined) ||
-    user.email?.split("@")[0] ||
+    profile?.nickname ??
+    (user.user_metadata?.nickname as string | undefined) ??
+    (user.user_metadata?.name as string | undefined) ??
+    user.email?.split("@")[0] ??
     "user";
 
   const { error } = await supabase.from("prompts").insert({

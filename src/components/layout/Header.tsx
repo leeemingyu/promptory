@@ -1,17 +1,10 @@
 ﻿import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUserProfile } from "@/lib/data/profiles.server";
 
 export default async function Header() {
-  const supabase = await createClient();
-
-  const { data } = await supabase.auth.getUser();
-  const user = data.user;
-
-  const username =
-    typeof user?.user_metadata?.nickname === "string"
-      ? user.user_metadata.nickname
-      : (user?.email ?? "");
+  const profile = await getCurrentUserProfile();
+  const nickname = profile?.nickname ?? profile?.email?.split("@")[0] ?? "";
 
   return (
     <header className="border-b bg-white">
@@ -28,11 +21,9 @@ export default async function Header() {
         </Link>
 
         <div className="flex items-center gap-4">
-          {user ? (
+          {profile ? (
             <>
-              <span className="text-sm font-medium">
-                {username.split("@")[0]}
-              </span>
+              <span className="text-sm font-medium">{nickname}</span>
               <Link
                 href="/prompts/create"
                 className="rounded bg-black px-3 py-1.5 text-sm text-white hover:bg-gray-800"
