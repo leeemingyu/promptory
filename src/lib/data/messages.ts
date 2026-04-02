@@ -1,9 +1,10 @@
 export const LOGIN_REQUIRED_MESSAGE = "로그인이 필요합니다.";
 export const LOGIN_FAILED_MESSAGE = "로그인에 실패했습니다. 다시 시도해주세요.";
-export const REGISTER_FAILED_MESSAGE = "회원가입에 실패했습니다. 다시 시도해주세요.";
+export const REGISTER_FAILED_MESSAGE =
+  "회원가입에 실패했습니다. 다시 시도해주세요.";
 export const LOGIN_SUCCESS_MESSAGE = "로그인 성공했습니다.";
 export const REGISTER_SUCCESS_MESSAGE =
-  "회원가입이 완료되었습니다. 이메일을 확인한 뒤 로그인해주세요.";
+  "가입 확인 메일을 보냈습니다. 이메일 인증을 완료하시면 바로 서비스를 이용하실 수 있습니다.";
 export const RATE_LIMIT_MESSAGE =
   "요청이 너무 많습니다. 잠시 후 다시 시도해주세요.";
 export const CREATE_SUCCESS_MESSAGE = "프롬프트가 생성되었습니다.";

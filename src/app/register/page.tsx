@@ -13,25 +13,17 @@ import {
 export default function RegisterPage() {
   const [formData, setFormData] = useState<RegisterFormData>({
     email: "",
-    nickname: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCheckingNickname, setIsCheckingNickname] = useState(false);
   const [isCheckingEmail, setIsCheckingEmail] = useState(false);
-  const [isNicknameAvailable, setIsNicknameAvailable] = useState<
-    boolean | null
-  >(null);
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean | null>(
     null,
   );
-  const [nicknameMessage, setNicknameMessage] = useState("");
   const [emailMessage, setEmailMessage] = useState("");
-  const [lastCheckedNickname, setLastCheckedNickname] = useState("");
   const [lastCheckedEmail, setLastCheckedEmail] = useState("");
   const router = useRouter();
   const supabase = createClient();
-  const trimmedNickname = formData.nickname.trim();
   const isEmailValid =
     formData.email.trim().length > 3 &&
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
@@ -39,65 +31,14 @@ export default function RegisterPage() {
   const showEmailError = formData.email.length > 0 && !isEmailValid;
   const showPasswordError = formData.password.length > 0 && !isPasswordValid;
   const canSubmit =
-    isNicknameAvailable === true &&
-    isEmailValid &&
-    isEmailAvailable === true &&
-    isPasswordValid;
+    isEmailValid && isEmailAvailable === true && isPasswordValid;
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-    if (name === "nickname") {
-      setIsNicknameAvailable(null);
-      setNicknameMessage("");
-    }
     if (name === "email") {
       setIsEmailAvailable(null);
       setEmailMessage("");
-    }
-  };
-
-  const checkNickname = async (nickname: string) => {
-    const trimmed = nickname.trim();
-    if (!trimmed) {
-      setIsNicknameAvailable(false);
-      setNicknameMessage("닉네임을 입력해주세요.");
-      return false;
-    }
-
-    if (trimmed === lastCheckedNickname && isNicknameAvailable !== null) {
-      return isNicknameAvailable;
-    }
-
-    setIsCheckingNickname(true);
-    setIsNicknameAvailable(null);
-    setNicknameMessage("중복 확인 중...");
-
-    try {
-      const { data, error } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("nickname", trimmed)
-        .limit(1);
-
-      if (error) {
-        setIsNicknameAvailable(false);
-        setNicknameMessage("닉네임 확인 중 오류가 발생했습니다.");
-        return false;
-      }
-
-      if (data && data.length > 0) {
-        setIsNicknameAvailable(false);
-        setNicknameMessage("이미 사용 중인 닉네임입니다.");
-        return false;
-      }
-
-      setIsNicknameAvailable(true);
-      setNicknameMessage("사용 가능한 닉네임입니다.");
-      setLastCheckedNickname(trimmed);
-      return true;
-    } finally {
-      setIsCheckingNickname(false);
     }
   };
 
@@ -123,6 +64,7 @@ export default function RegisterPage() {
         .select("id")
         .eq("email", trimmed)
         .limit(1);
+
       if (error) {
         setIsEmailAvailable(false);
         setEmailMessage("이메일 확인 중 오류가 발생했습니다.");
@@ -145,19 +87,6 @@ export default function RegisterPage() {
   };
 
   useEffect(() => {
-    const nickname = trimmedNickname;
-    if (!nickname) return;
-
-    const timeoutId = window.setTimeout(() => {
-      void checkNickname(nickname);
-    }, 500);
-
-    return () => {
-      window.clearTimeout(timeoutId);
-    };
-  }, [formData.nickname]);
-
-  useEffect(() => {
     const email = formData.email.trim();
     if (!email || !isEmailValid) return;
 
@@ -175,12 +104,7 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
-      const nicknameOk = await checkNickname(formData.nickname);
       const emailOk = await checkEmail(formData.email);
-      if (!nicknameOk) {
-        setIsLoading(false);
-        return;
-      }
       if (!emailOk) {
         setIsLoading(false);
         return;
@@ -191,9 +115,6 @@ export default function RegisterPage() {
         password: formData.password,
         options: {
           emailRedirectTo: "http://localhost:3000/welcome",
-          data: {
-            nickname: formData.nickname,
-          },
         },
       });
 
@@ -276,42 +197,11 @@ export default function RegisterPage() {
             </p>
           )}
         </div>
-        <div>
-          <input
-            type="text"
-            name="nickname"
-            placeholder="닉네임"
-            value={formData.nickname}
-            className={`w-full rounded-lg border p-3 outline-none focus:ring-2 ${
-              isNicknameAvailable === false
-                ? "border-rose-300 focus:ring-rose-200"
-                : isNicknameAvailable === true
-                  ? "border-emerald-300 focus:ring-emerald-200"
-                  : "border-gray-300 focus:ring-black"
-            }`}
-            onChange={handleChange}
-          />
-          {nicknameMessage && (
-            <p
-              className={`mt-2 text-xs ${
-                isCheckingNickname
-                  ? "text-gray-500"
-                  : isNicknameAvailable
-                    ? "text-emerald-600"
-                    : "text-rose-600"
-              }`}
-            >
-              {nicknameMessage}
-            </p>
-          )}
-        </div>
         <button
           type="submit"
-          disabled={
-            isLoading || isCheckingNickname || isCheckingEmail || !canSubmit
-          }
+          disabled={isLoading || isCheckingEmail || !canSubmit}
           className={`w-full rounded-lg p-3 font-semibold text-white transition ${
-            isLoading || isCheckingNickname || isCheckingEmail
+            isLoading || isCheckingEmail
               ? "cursor-not-allowed bg-gray-400 opacity-70"
               : canSubmit
                 ? "cursor-pointer bg-black hover:bg-gray-800"
