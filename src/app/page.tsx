@@ -4,11 +4,11 @@ import LikeButton from "@/app/prompts/[id]/LikeButton";
 import {
   getCurrentUserId,
   getLikedPromptIds,
-  getPrompts,
+  getPopularPromptsCached,
 } from "@/lib/data/prompts.server";
 
 export default async function HomePage() {
-  const prompts = await getPrompts({ sort: "popular", limit: 12 });
+  const prompts = await getPopularPromptsCached();
   const currentUserId = await getCurrentUserId();
   const likedPromptIds = currentUserId
     ? await getLikedPromptIds(currentUserId)

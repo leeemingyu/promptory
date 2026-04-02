@@ -2,6 +2,8 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { LOAD_FAILED_MESSAGE } from "@/lib/data/messages";
+import { unstable_cache } from "next/cache";
+import { createClient as createPublicClient } from "@supabase/supabase-js";
 
 type PromptRow = {
   id: string;
@@ -112,6 +114,65 @@ export async function getPrompts(options?: {
 
   return prompts;
 }
+
+async function getPopularPromptsPublic(): Promise<PromptRow[]> {
+  const supabase = createPublicClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  const { data, error } = await supabase
+    .from("prompts")
+    .select(
+      "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    logServerError("getPopularPromptsPublic", error);
+    return [];
+  }
+
+  let prompts = data ?? [];
+  if (prompts.length === 0) {
+    return prompts;
+  }
+
+  const promptIds = prompts.map((prompt) => prompt.id);
+  const { data: likeRows, error: likeError } = await supabase
+    .from("prompt_likes")
+    .select("prompt_id")
+    .in("prompt_id", promptIds);
+
+  if (likeError) {
+    logServerError("getPopularPromptsPublic/likeCounts", likeError);
+    return prompts.slice(0, 12);
+  }
+
+  const likeCountById = new Map<string, number>();
+  for (const row of likeRows ?? []) {
+    const promptId = row.prompt_id;
+    if (typeof promptId !== "string") continue;
+    likeCountById.set(promptId, (likeCountById.get(promptId) ?? 0) + 1);
+  }
+
+  prompts = [...prompts].sort((a, b) => {
+    const aLikes = likeCountById.get(a.id) ?? 0;
+    const bLikes = likeCountById.get(b.id) ?? 0;
+    if (bLikes !== aLikes) return bLikes - aLikes;
+    return (
+      new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+  });
+
+  return prompts.slice(0, 12);
+}
+
+export const getPopularPromptsCached = unstable_cache(
+  async () => getPopularPromptsPublic(),
+  ["popular-prompts", "v1"],
+  { revalidate: 600 },
+);
 
 export async function getPromptModels(): Promise<string[]> {
   const supabase = await createClient();
