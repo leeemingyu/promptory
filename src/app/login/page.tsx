@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { LoginFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -199,6 +200,12 @@ export default function LoginPage() {
           </>
         )}
       </button>
+      <p className="mt-4 text-center text-sm text-gray-600">
+        계정이 없나요?{" "}
+        <Link href="/register" className="font-semibold text-black">
+          회원가입
+        </Link>
+      </p>
     </main>
   );
 }
