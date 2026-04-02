@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import type { LoginFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -172,13 +173,31 @@ export default function LoginPage() {
         type="button"
         onClick={handleKakaoLogin}
         disabled={isOauthLoading}
-        className={`w-full rounded-lg p-3 text-sm font-semibold transition ${
+        className={`relative flex w-full items-center justify-center rounded-lg p-3 text-sm font-semibold transition ${
           isOauthLoading
             ? "cursor-not-allowed bg-yellow-200 text-yellow-700"
             : "cursor-pointer bg-[#FEE500] text-[#3C1E1E] hover:brightness-95"
         }`}
       >
-        {isOauthLoading ? "카카오 로그인 중..." : "카카오로 로그인"}
+        <span className="absolute left-4">
+          <Image
+            src="/icons/kakao.svg"
+            alt=""
+            width={20}
+            height={20}
+            aria-hidden="true"
+          />
+        </span>
+        {isOauthLoading ? (
+          "카카오 로그인 중..."
+        ) : (
+          <>
+            <span className="w-full text-center">
+              <span className="inline sm:hidden">로그인</span>
+              <span className="hidden sm:inline">카카오 로그인</span>
+            </span>
+          </>
+        )}
       </button>
     </main>
   );
