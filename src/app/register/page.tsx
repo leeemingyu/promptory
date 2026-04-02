@@ -1,6 +1,8 @@
 ﻿"use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { RegisterFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
@@ -20,6 +22,7 @@ export default function RegisterPage() {
   const [isEmailAvailable, setIsEmailAvailable] = useState<boolean | null>(
     null,
   );
+  const [isOauthLoading, setIsOauthLoading] = useState(false);
   const [emailMessage, setEmailMessage] = useState("");
   const [lastCheckedEmail, setLastCheckedEmail] = useState("");
   const router = useRouter();
@@ -138,6 +141,34 @@ export default function RegisterPage() {
     }
   };
 
+  const handleKakaoLogin = async () => {
+    setIsOauthLoading(true);
+    try {
+      const origin = window.location.origin;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "kakao",
+        options: {
+          redirectTo: `${origin}/auth/callback`,
+          scopes: "account_email",
+        },
+      });
+
+      if (error) {
+        const message =
+          error?.status === 429 ||
+          error?.message?.toLowerCase().includes("too many")
+            ? RATE_LIMIT_MESSAGE
+            : (error?.message ?? REGISTER_FAILED_MESSAGE);
+        throw new Error(message);
+      }
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : REGISTER_FAILED_MESSAGE;
+      alert(message);
+      setIsOauthLoading(false);
+    }
+  };
+
   return (
     <main className="mx-auto mt-20 max-w-md rounded-2xl border p-6 shadow-sm">
       <h1 className="mb-6 text-2xl font-bold">회원가입</h1>
@@ -211,6 +242,47 @@ export default function RegisterPage() {
           {isLoading ? "가입 중..." : "가입하기"}
         </button>
       </form>
+      <div className="my-6 flex items-center gap-3 text-xs text-gray-400">
+        <span className="h-px flex-1 bg-gray-200" />
+        또는
+        <span className="h-px flex-1 bg-gray-200" />
+      </div>
+      <button
+        type="button"
+        onClick={handleKakaoLogin}
+        disabled={isOauthLoading}
+        className={`relative flex w-full items-center justify-center rounded-lg p-3 text-sm font-semibold transition ${
+          isOauthLoading
+            ? "cursor-not-allowed bg-yellow-200 text-yellow-700"
+            : "cursor-pointer bg-[#FEE500] text-[#3C1E1E] hover:brightness-95"
+        }`}
+      >
+        {isOauthLoading ? (
+          "카카오 로그인 중..."
+        ) : (
+          <>
+            <span className="absolute left-4">
+              <Image
+                src="/icons/kakao.svg"
+                alt=""
+                width={20}
+                height={20}
+                aria-hidden="true"
+              />
+            </span>
+            <span className="w-full text-center">
+              <span className="inline sm:hidden">로그인</span>
+              <span className="hidden sm:inline">카카오 로그인</span>
+            </span>
+          </>
+        )}
+      </button>
+      <p className="mt-4 text-center text-sm text-gray-600">
+        이미 계정이 있나요?{" "}
+        <Link href="/login" className="font-semibold text-black">
+          로그인
+        </Link>
+      </p>
     </main>
   );
 }
