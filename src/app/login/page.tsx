@@ -6,11 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { LoginFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { mapLoginErrorMessage, mapRegisterErrorMessage } from "@/lib/auth/error-mapping";
+import { isValidEmail, isValidPassword } from "@/lib/auth/validation";
 import {
   LOGIN_FAILED_MESSAGE,
   LOGIN_SUCCESS_MESSAGE,
-  EMAIL_NOT_CONFIRMED_MESSAGE,
-  RATE_LIMIT_MESSAGE,
 } from "@/lib/data/messages";
 
 export default function LoginPage() {
@@ -22,10 +22,8 @@ export default function LoginPage() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [isOauthLoading, setIsOauthLoading] = useState(false);
-  const isEmailValid =
-    formData.email.trim().length > 3 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-  const isPasswordValid = formData.password.length >= 6;
+  const isEmailValid = isValidEmail(formData.email);
+  const isPasswordValid = isValidPassword(formData.password);
   const [hasSubmitted, setHasSubmitted] = useState(false);
   const showEmailError = hasSubmitted && !isEmailValid;
   const showPasswordError = hasSubmitted && !isPasswordValid;
@@ -48,14 +46,7 @@ export default function LoginPage() {
       });
 
       if (error || !data.user) {
-        const rawMessage = error?.message?.toLowerCase() ?? "";
-        const message =
-          rawMessage.includes("email not confirmed") ||
-          rawMessage.includes("email_not_confirmed")
-            ? EMAIL_NOT_CONFIRMED_MESSAGE
-            : error?.status === 429 || rawMessage.includes("too many")
-              ? RATE_LIMIT_MESSAGE
-              : (error?.message ?? LOGIN_FAILED_MESSAGE);
+        const message = mapLoginErrorMessage(error, LOGIN_FAILED_MESSAGE);
         throw new Error(message);
       }
 
@@ -84,11 +75,7 @@ export default function LoginPage() {
       });
 
       if (error) {
-        const message =
-          error?.status === 429 ||
-          error?.message?.toLowerCase().includes("too many")
-            ? RATE_LIMIT_MESSAGE
-            : (error?.message ?? LOGIN_FAILED_MESSAGE);
+        const message = mapRegisterErrorMessage(error, LOGIN_FAILED_MESSAGE);
         throw new Error(message);
       }
     } catch (error: unknown) {

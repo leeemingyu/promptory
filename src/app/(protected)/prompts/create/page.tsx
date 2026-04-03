@@ -11,6 +11,7 @@ import {
   CREATE_SUCCESS_MESSAGE,
   CREATE_FAILED_MESSAGE,
   LOGIN_REQUIRED_MESSAGE,
+  IMAGE_REQUIRED_MESSAGE,
 } from "@/lib/data/messages";
 import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
@@ -33,6 +34,7 @@ export default function CreatePromptPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string>("");
+  const [showImageError, setShowImageError] = useState(false);
   const [formData, setFormData] = useState<CreatePromptInput>({
     title: "",
     prompt_text: "",
@@ -51,6 +53,7 @@ export default function CreatePromptPage() {
     if (!file) return;
 
     setImageFile(file);
+    setShowImageError(false);
     setPreviewUrl((prev) => {
       if (prev) URL.revokeObjectURL(prev);
       return URL.createObjectURL(file);
@@ -64,6 +67,10 @@ export default function CreatePromptPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!imageFile) {
+      setShowImageError(true);
+      return;
+    }
 
     setIsLoading(true);
 
@@ -168,8 +175,14 @@ export default function CreatePromptPage() {
             type="file"
             accept="image/*"
             onChange={handleFileChange}
+            required
             className="block w-full cursor-pointer text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800"
           />
+          {showImageError && !previewUrl && (
+            <p className="mt-2 text-xs text-rose-600">
+              {IMAGE_REQUIRED_MESSAGE}
+            </p>
+          )}
           {previewUrl && (
             <div className="relative mt-4 h-40 w-40">
               <Image

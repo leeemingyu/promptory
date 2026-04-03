@@ -14,4 +14,6 @@ export const LOAD_FAILED_MESSAGE = "불러오기에 실패했습니다.";
 export const UPDATE_FAILED_MESSAGE = "수정에 실패했습니다.";
 export const DELETE_FAILED_MESSAGE = "삭제에 실패했습니다.";
 export const LIKE_FAILED_MESSAGE = "좋아요 처리에 실패했습니다.";
-export const EMAIL_NOT_CONFIRMED_MESSAGE = "로그인 전 이메일 인증이 필요해요. 메일함(또는 스팸함) 확인 후 인증을 완료해 주세요.";
+export const EMAIL_NOT_CONFIRMED_MESSAGE =
+  "로그인 전 이메일 인증이 필요해요. 메일함(또는 스팸함) 확인 후 인증을 완료해 주세요.";
+export const IMAGE_REQUIRED_MESSAGE = "이미지를 선택해 주세요";
