@@ -6,10 +6,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { RegisterFormData } from "@/types";
 import { createClient } from "@/lib/supabase/client";
+import { mapRegisterErrorMessage } from "@/lib/auth/error-mapping";
+import { isValidEmail, isValidPassword } from "@/lib/auth/validation";
 import {
   REGISTER_FAILED_MESSAGE,
   REGISTER_SUCCESS_MESSAGE,
-  RATE_LIMIT_MESSAGE,
 } from "@/lib/data/messages";
 
 export default function RegisterPage() {
@@ -27,10 +28,8 @@ export default function RegisterPage() {
   const [lastCheckedEmail, setLastCheckedEmail] = useState("");
   const router = useRouter();
   const supabase = createClient();
-  const isEmailValid =
-    formData.email.trim().length > 3 &&
-    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email);
-  const isPasswordValid = formData.password.length >= 6;
+  const isEmailValid = isValidEmail(formData.email);
+  const isPasswordValid = isValidPassword(formData.password);
   const showEmailError = formData.email.length > 0 && !isEmailValid;
   const showPasswordError = formData.password.length > 0 && !isPasswordValid;
   const canSubmit =
@@ -122,11 +121,10 @@ export default function RegisterPage() {
       });
 
       if (error || !data.user) {
-        const message =
-          error?.status === 429 ||
-          error?.message?.toLowerCase().includes("too many")
-            ? RATE_LIMIT_MESSAGE
-            : (error?.message ?? REGISTER_FAILED_MESSAGE);
+        const message = mapRegisterErrorMessage(
+          error,
+          REGISTER_FAILED_MESSAGE,
+        );
         throw new Error(message);
       }
 
@@ -154,11 +152,10 @@ export default function RegisterPage() {
       });
 
       if (error) {
-        const message =
-          error?.status === 429 ||
-          error?.message?.toLowerCase().includes("too many")
-            ? RATE_LIMIT_MESSAGE
-            : (error?.message ?? REGISTER_FAILED_MESSAGE);
+        const message = mapRegisterErrorMessage(
+          error,
+          REGISTER_FAILED_MESSAGE,
+        );
         throw new Error(message);
       }
     } catch (error: unknown) {
