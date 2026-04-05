@@ -32,7 +32,7 @@ export default function ModelFilter({
       name="model"
       value={value}
       onChange={handleChange}
-      className="w-full rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+      className="w-full rounded-lg border bg-white p-3 text-sm border-gray-300 outline-none focus:ring-2 focus:ring-black"
     >
       <option value="">전체</option>
       {options.map((model) => (

@@ -1,6 +1,5 @@
-﻿import Image from "next/image";
-import Link from "next/link";
-import LikeButton from "@/app/prompts/[id]/LikeButton";
+﻿import Link from "next/link";
+import PromptCard from "@/components/prompts/PromptCard";
 import {
   getCurrentUserId,
   getLikedPromptIds,
@@ -16,15 +15,24 @@ export default async function HomePage() {
   const likedSet = new Set(likedPromptIds);
 
   return (
-    <main className="mx-auto max-w-7xl p-6">
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-3xl font-bold">인기 프롬프트</h1>
+    <main className="mx-auto max-w-7xl md:p-6">
+      <section className="mb-8 md:mb-11 rounded-2xl bg-white md:py-20 md:text-center">
+        <h1 className="mt-4 break-keep text-3xl font-bold text-black sm:text-4xl">
+          창작의 완성도를 높여줄 프롬프트 아카이브
+        </h1>
+        <p className="mx-auto mt-2 sm:mt-4 max-w-2xl break-keep text-3xl text-gray-500 sm:text-4xl font-bold">
+          프롬프토리
+        </p>
+      </section>
+
+      <div className="mb-6 flex flex-col items-start gap-10 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/prompts"
-          className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 transition hover:bg-gray-50"
+          className="order-1 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 sm:order-2"
         >
-          전체 프롬프트 보기
+          전체 프롬프트
         </Link>
+        <h1 className="order-2 text-3xl font-bold sm:order-1">인기 프롬프트</h1>
       </div>
 
       {prompts.length === 0 ? (
@@ -34,49 +42,13 @@ export default async function HomePage() {
       ) : (
         <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
           {prompts.map((prompt) => (
-            <div
+            <PromptCard
               key={prompt.id}
-              className="relative overflow-hidden rounded-xl shadow-sm transition hover:shadow-md"
-            >
-              {currentUserId && (
-                <div className="absolute left-2 top-2 z-10">
-                  <LikeButton
-                    promptId={prompt.id}
-                    initialLiked={likedSet.has(prompt.id)}
-                  />
-                </div>
-              )}
-              <Link href={`/prompts/${prompt.id}`}>
-                <div className="relative aspect-[3/4] bg-gray-100">
-                  {prompt.sample_image_url ? (
-                    <Image
-                      src={prompt.sample_image_url}
-                      alt={prompt.title}
-                      fill
-                      className="h-full w-full object-cover"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    />
-                  ) : (
-                    <div className="flex h-full items-center justify-center text-gray-400">
-                      이미지 없음
-                    </div>
-                  )}
-                  <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
-                    {prompt.ai_model}
-                  </span>
-                </div>
-
-                <div className="p-4">
-                  <h2 className="truncate text-lg font-semibold">
-                    {prompt.title}
-                  </h2>
-
-                  <div className="mt-4 flex items-center justify-between text-xs text-gray-400">
-                    <span>작성자 {prompt.nickname}</span>
-                  </div>
-                </div>
-              </Link>
-            </div>
+              prompt={prompt}
+              href={`/prompts/${prompt.id}`}
+              showLike={Boolean(currentUserId)}
+              liked={likedSet.has(prompt.id)}
+            />
           ))}
         </div>
       )}

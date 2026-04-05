@@ -8,11 +8,7 @@ type SortSelectProps = {
   model: string;
 };
 
-export default function SortSelect({
-  value,
-  query,
-  model,
-}: SortSelectProps) {
+export default function SortSelect({ value, query, model }: SortSelectProps) {
   const router = useRouter();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -29,7 +25,7 @@ export default function SortSelect({
     <select
       value={value}
       onChange={handleChange}
-      className="rounded-lg border bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-black"
+      className="rounded-lg border border-gray-300 bg-white p-2 text-sm outline-none focus:ring-2 focus:ring-black"
     >
       <option value="latest">최신순</option>
       <option value="popular">인기순</option>
