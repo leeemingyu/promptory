@@ -3,7 +3,11 @@
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
-export default function LogoutButton() {
+type LogoutButtonProps = {
+  onLogout?: () => void;
+};
+
+export default function LogoutButton({ onLogout }: LogoutButtonProps) {
   const router = useRouter();
   const supabase = createClient();
 
@@ -13,6 +17,8 @@ export default function LogoutButton() {
       router.refresh();
     } catch (error) {
       console.error("로그아웃 실패:", error);
+    } finally {
+      onLogout?.();
     }
   };
 
