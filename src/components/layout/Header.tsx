@@ -7,7 +7,7 @@ export default async function Header() {
   const nickname = profile?.nickname ?? profile?.email?.split("@")[0] ?? "";
 
   return (
-    <header className="border-b bg-white">
+    <header className="sticky top-0 z-50 border-b border-gray-200 bg-white/95 backdrop-blur">
       <div className="relative mx-auto flex h-16 max-w-7xl items-center justify-between px-4">
         <Link href="/" className="text-xl font-bold text-black">
           PROMPTORY
@@ -15,7 +15,7 @@ export default async function Header() {
 
         <Link
           href="/prompts"
-          className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-700 hover:text-black"
+          className="absolute left-1/2 -translate-x-1/2 text-sm font-semibold text-gray-800 hover:text-black"
         >
           전체 프롬프트
         </Link>
