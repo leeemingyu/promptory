@@ -16,7 +16,7 @@ export default async function HomePage() {
 
   return (
     <main className="mx-auto max-w-7xl p-6">
-      <section className="mb-10 rounded-2xl bg-white md:py-25 md:text-center">
+      <section className="mb-11 rounded-2xl bg-white md:py-20 md:text-center">
         <h1 className="mt-4 break-keep text-3xl font-bold text-black sm:text-4xl">
           창작의 완성도를 높여줄 프롬프트 아카이브
         </h1>
