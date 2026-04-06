@@ -7,6 +7,7 @@ type ModelFilterProps = {
   value: string;
   query: string;
   sort: string;
+  perfTest?: boolean;
 };
 
 export default function ModelFilter({
@@ -14,12 +15,14 @@ export default function ModelFilter({
   value,
   query,
   sort,
+  perfTest = false,
 }: ModelFilterProps) {
   const router = useRouter();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const nextModel = event.target.value;
     const params = new URLSearchParams();
+    if (perfTest) params.set("perf_test", "true");
     if (sort && sort !== "latest") params.set("sort", sort);
     if (query) params.set("q", query);
     if (nextModel) params.set("model", nextModel);
@@ -32,7 +35,7 @@ export default function ModelFilter({
       name="model"
       value={value}
       onChange={handleChange}
-      className="w-full rounded-lg border bg-white p-3 text-sm border-gray-300 outline-none focus:ring-2 focus:ring-black"
+      className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-black"
     >
       <option value="">전체</option>
       {options.map((model) => (

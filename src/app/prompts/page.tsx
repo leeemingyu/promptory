@@ -1,11 +1,11 @@
 ﻿import Link from "next/link";
-import PromptCard from "@/components/prompts/PromptCard";
 import ModelFilter from "@/app/prompts/ModelFilter";
-import SortSelect from "@/app/prompts/SortSelect";
+import MockPromptsInfinite from "@/app/prompts/MockPromptsInfinite";
+import DbPromptsInfinite from "@/app/prompts/DbPromptsInfinite";
 import {
   getCurrentUserId,
   getLikedPromptIds,
-  getPrompts,
+  getPromptsPage,
   type PromptSort,
 } from "@/lib/data/prompts.server";
 
@@ -17,39 +17,6 @@ const MODEL_OPTIONS = [
   "Claude 3",
   "Etc",
 ];
-
-type MockPrompt = {
-  id: string;
-  title: string;
-  prompt_text: string;
-  description: string;
-  ai_model: string;
-  sample_image_url: string;
-  created_at: string;
-  nickname: string;
-  like_count: number;
-};
-
-const generateMockPrompts = (count: number): MockPrompt[] =>
-  Array.from({ length: count }, (_, index) => {
-    const order = index + 1;
-    const model = MODEL_OPTIONS[index % MODEL_OPTIONS.length];
-    const createdAt = new Date(
-      Date.now() - index * 1000 * 60 * 60,
-    ).toISOString();
-
-    return {
-      id: `mock-${order}`,
-      title: `샘플 프롬프트 ${order}`,
-      prompt_text: `샘플 프롬프트 ${order}번입니다.`,
-      description: `테스트 데이터 ${order}번 설명입니다.`,
-      ai_model: model,
-      sample_image_url: `https://picsum.photos/seed/prompt-${order}/600/800`,
-      created_at: createdAt,
-      nickname: `Creator ${((order - 1) % 20) + 1}`,
-      like_count: Math.max(0, 1000 - order * 3),
-    };
-  });
 
 type PromptsPageProps = {
   searchParams?: Promise<{
@@ -77,53 +44,27 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         ? "oldest"
         : "latest";
 
-  let prompts: MockPrompt[] | Awaited<ReturnType<typeof getPrompts>>;
+  const pageSize = 20;
+  let prompts: Awaited<ReturnType<typeof getPromptsPage>> = [];
   let currentUserId: string | null = null;
-  let likedSet = new Set<string>();
+  let likedPromptIds: string[] = [];
 
-  if (isPerfTest) {
-    const allPrompts = generateMockPrompts(100);
-    const filtered = allPrompts.filter((prompt) => {
-      if (modelValue && prompt.ai_model !== modelValue) return false;
-      if (!queryValue) return true;
-      const lower = queryValue.toLowerCase();
-      return (
-        prompt.title.toLowerCase().includes(lower) ||
-        prompt.description.toLowerCase().includes(lower)
-      );
-    });
-
-    prompts =
-      sort === "popular"
-        ? filtered.sort((a, b) => b.like_count - a.like_count)
-        : sort === "oldest"
-          ? filtered.sort(
-              (a, b) =>
-                new Date(a.created_at).getTime() -
-                new Date(b.created_at).getTime(),
-            )
-          : filtered.sort(
-              (a, b) =>
-                new Date(b.created_at).getTime() -
-                new Date(a.created_at).getTime(),
-            );
-  } else {
+  if (!isPerfTest) {
     [prompts, currentUserId] = await Promise.all([
-      getPrompts({
+      getPromptsPage({
         sort,
         query: queryValue || undefined,
         model: modelValue || undefined,
+        page: 0,
+        limit: pageSize,
       }),
       getCurrentUserId(),
     ]);
 
-    const likedPromptIds = currentUserId
+    likedPromptIds = currentUserId
       ? await getLikedPromptIds(currentUserId)
       : [];
-    likedSet = new Set(likedPromptIds);
   }
-
-  const hasFilters = Boolean(queryValue || modelValue || sort !== "latest");
 
   const buildHref = (next: {
     sort?: PromptSort;
@@ -137,17 +78,6 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
     if (next.model) params.set("model", next.model);
     const qs = params.toString();
     return qs ? `/prompts?${qs}` : "/prompts";
-  };
-
-  const buildDetailHref = (id: string) => {
-    if (isPerfTest)
-      return buildHref({ sort, q: queryValue, model: modelValue });
-    const params = new URLSearchParams();
-    if (sort !== "latest") params.set("sort", sort);
-    if (queryValue) params.set("q", queryValue);
-    if (modelValue) params.set("model", modelValue);
-    const qs = params.toString();
-    return qs ? `/prompts/${id}?${qs}` : `/prompts/${id}`;
   };
 
   return (
@@ -185,6 +115,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
               value={modelValue}
               query={queryValue}
               sort={sort}
+              perfTest={isPerfTest}
             />
             <Link
               href={buildHref({ sort, q: queryValue })}
@@ -201,29 +132,26 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         </aside>
 
         <section className="col-span-1 sm:col-span-3">
-          <div className="mb-4 flex items-center justify-between w-full">
-            <p className="text-sm text-gray-500">{prompts.length}개 프롬프트</p>
-            <div className="flex gap-2 items-center">
-              <span className="text-xs font-semibold text-gray-500">정렬</span>
-              <SortSelect value={sort} query={queryValue} model={modelValue} />
-            </div>
-          </div>
-          {prompts.length === 0 ? (
-            <div className="rounded-2xl border border-dashed p-10 text-center text-sm text-gray-500">
-              조건에 맞는 프롬프트가 없습니다.
-            </div>
+          {isPerfTest ? (
+            <MockPromptsInfinite
+              key={`perf-${sort}-${queryValue}-${modelValue}`}
+              query={queryValue}
+              model={modelValue}
+              sort={sort}
+              totalCount={1000}
+              pageSize={pageSize}
+            />
           ) : (
-            <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
-              {prompts.map((prompt) => (
-                <PromptCard
-                  key={prompt.id}
-                  prompt={prompt}
-                  href={buildDetailHref(prompt.id)}
-                  showLike={Boolean(currentUserId)}
-                  liked={likedSet.has(prompt.id)}
-                />
-              ))}
-            </div>
+            <DbPromptsInfinite
+              key={`${sort}-${queryValue}-${modelValue}`}
+              initialPrompts={prompts}
+              query={queryValue}
+              model={modelValue}
+              sort={sort}
+              pageSize={pageSize}
+              likedIds={likedPromptIds}
+              showLike={Boolean(currentUserId)}
+            />
           )}
         </section>
       </div>
