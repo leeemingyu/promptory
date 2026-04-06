@@ -6,14 +6,21 @@ type SortSelectProps = {
   value: string;
   query: string;
   model: string;
+  perfTest?: boolean;
 };
 
-export default function SortSelect({ value, query, model }: SortSelectProps) {
+export default function SortSelect({
+  value,
+  query,
+  model,
+  perfTest = false,
+}: SortSelectProps) {
   const router = useRouter();
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const nextSort = event.target.value;
     const params = new URLSearchParams();
+    if (perfTest) params.set("perf_test", "true");
     if (nextSort && nextSort !== "latest") params.set("sort", nextSort);
     if (query) params.set("q", query);
     if (model) params.set("model", model);
@@ -25,7 +32,7 @@ export default function SortSelect({ value, query, model }: SortSelectProps) {
     <select
       value={value}
       onChange={handleChange}
-      className="rounded-lg border border-gray-300 bg-white p-2 text-sm outline-none focus:ring-2 focus:ring-black"
+      className="rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-black"
     >
       <option value="latest">최신순</option>
       <option value="popular">인기순</option>
