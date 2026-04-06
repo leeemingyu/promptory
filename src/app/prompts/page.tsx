@@ -9,8 +9,55 @@ import {
   type PromptSort,
 } from "@/lib/data/prompts.server";
 
+const MODEL_OPTIONS = [
+  "GPT-4",
+  "Midjourney",
+  "Stable Diffusion",
+  "DALL-E 3",
+  "Claude 3",
+  "Etc",
+];
+
+type MockPrompt = {
+  id: string;
+  title: string;
+  prompt_text: string;
+  description: string;
+  ai_model: string;
+  sample_image_url: string;
+  created_at: string;
+  nickname: string;
+  like_count: number;
+};
+
+const generateMockPrompts = (count: number): MockPrompt[] =>
+  Array.from({ length: count }, (_, index) => {
+    const order = index + 1;
+    const model = MODEL_OPTIONS[index % MODEL_OPTIONS.length];
+    const createdAt = new Date(
+      Date.now() - index * 1000 * 60 * 60,
+    ).toISOString();
+
+    return {
+      id: `mock-${order}`,
+      title: `샘플 프롬프트 ${order}`,
+      prompt_text: `샘플 프롬프트 ${order}번입니다.`,
+      description: `테스트 데이터 ${order}번 설명입니다.`,
+      ai_model: model,
+      sample_image_url: `https://picsum.photos/seed/prompt-${order}/600/800`,
+      created_at: createdAt,
+      nickname: `Creator ${((order - 1) % 20) + 1}`,
+      like_count: Math.max(0, 1000 - order * 3),
+    };
+  });
+
 type PromptsPageProps = {
-  searchParams?: Promise<{ sort?: string; q?: string; model?: string }>;
+  searchParams?: Promise<{
+    sort?: string;
+    q?: string;
+    model?: string;
+    perf_test?: string;
+  }>;
 };
 
 export default async function PromptsPage({ searchParams }: PromptsPageProps) {
@@ -18,6 +65,8 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
   const sortParam = resolvedParams?.sort;
   const queryParam = resolvedParams?.q ?? "";
   const modelParam = resolvedParams?.model ?? "";
+  const perfTestParam = resolvedParams?.perf_test;
+  const isPerfTest = perfTestParam === "true";
 
   const queryValue = queryParam.trim();
   const modelValue = modelParam.trim();
@@ -28,29 +77,53 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         ? "oldest"
         : "latest";
 
-  const [prompts, currentUserId] = await Promise.all([
-    getPrompts({
-      sort,
-      query: queryValue || undefined,
-      model: modelValue || undefined,
-    }),
-    getCurrentUserId(),
-  ]);
+  let prompts: MockPrompt[] | Awaited<ReturnType<typeof getPrompts>>;
+  let currentUserId: string | null = null;
+  let likedSet = new Set<string>();
 
-  const likedPromptIds = currentUserId
-    ? await getLikedPromptIds(currentUserId)
-    : [];
-  const likedSet = new Set(likedPromptIds);
+  if (isPerfTest) {
+    const allPrompts = generateMockPrompts(100);
+    const filtered = allPrompts.filter((prompt) => {
+      if (modelValue && prompt.ai_model !== modelValue) return false;
+      if (!queryValue) return true;
+      const lower = queryValue.toLowerCase();
+      return (
+        prompt.title.toLowerCase().includes(lower) ||
+        prompt.description.toLowerCase().includes(lower)
+      );
+    });
+
+    prompts =
+      sort === "popular"
+        ? filtered.sort((a, b) => b.like_count - a.like_count)
+        : sort === "oldest"
+          ? filtered.sort(
+              (a, b) =>
+                new Date(a.created_at).getTime() -
+                new Date(b.created_at).getTime(),
+            )
+          : filtered.sort(
+              (a, b) =>
+                new Date(b.created_at).getTime() -
+                new Date(a.created_at).getTime(),
+            );
+  } else {
+    [prompts, currentUserId] = await Promise.all([
+      getPrompts({
+        sort,
+        query: queryValue || undefined,
+        model: modelValue || undefined,
+      }),
+      getCurrentUserId(),
+    ]);
+
+    const likedPromptIds = currentUserId
+      ? await getLikedPromptIds(currentUserId)
+      : [];
+    likedSet = new Set(likedPromptIds);
+  }
+
   const hasFilters = Boolean(queryValue || modelValue || sort !== "latest");
-
-  const modelOptions = [
-    "GPT-4",
-    "Midjourney",
-    "Stable Diffusion",
-    "DALL-E 3",
-    "Claude 3",
-    "Etc",
-  ];
 
   const buildHref = (next: {
     sort?: PromptSort;
@@ -58,6 +131,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
     model?: string;
   }) => {
     const params = new URLSearchParams();
+    if (isPerfTest) params.set("perf_test", "true");
     if (next.sort && next.sort !== "latest") params.set("sort", next.sort);
     if (next.q) params.set("q", next.q);
     if (next.model) params.set("model", next.model);
@@ -66,6 +140,8 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
   };
 
   const buildDetailHref = (id: string) => {
+    if (isPerfTest)
+      return buildHref({ sort, q: queryValue, model: modelValue });
     const params = new URLSearchParams();
     if (sort !== "latest") params.set("sort", sort);
     if (queryValue) params.set("q", queryValue);
@@ -85,6 +161,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         action="/prompts"
         className="mb-6 flex flex-wrap items-center gap-3 justify-between rounded-2xl bg-white py-4"
       >
+        {isPerfTest && <input type="hidden" name="perf_test" value="true" />}
         {modelValue && <input type="hidden" name="model" value={modelValue} />}
         {sort !== "latest" && <input type="hidden" name="sort" value={sort} />}
         <input
@@ -104,7 +181,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
               AI 모델
             </label>
             <ModelFilter
-              options={modelOptions}
+              options={MODEL_OPTIONS}
               value={modelValue}
               query={queryValue}
               sort={sort}
