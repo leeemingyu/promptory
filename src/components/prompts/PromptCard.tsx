@@ -36,7 +36,7 @@ export default function PromptCard({
               이미지 없음
             </div>
           )}
-          <div className="pointer-events-none absolute inset-0 bg-black/20 opacity-0 transition-opacity group-hover:opacity-30" />
+          <div className="pointer-events-none absolute inset-0 bg-black/50 opacity-0 transition-opacity group-hover:opacity-30" />
           <span className="absolute right-2 top-2 rounded bg-black/60 px-2 py-1 text-xs text-white">
             {prompt.ai_model}
           </span>
@@ -44,7 +44,9 @@ export default function PromptCard({
 
         <div className="px-4 py-2">
           <div className="flex items-center justify-between gap-2">
-            <h2 className="truncate text-lg font-semibold">{prompt.title}</h2>
+            <h2 className="truncate md:text-lg font-semibold">
+              {prompt.title}
+            </h2>
             {showLike && (
               <LikeButton
                 promptId={prompt.id}
