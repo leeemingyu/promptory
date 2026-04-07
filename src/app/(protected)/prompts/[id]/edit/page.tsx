@@ -19,6 +19,7 @@ import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
 
 const MODEL_OPTIONS = [
+  "GEMINI",
   "GPT-4",
   "Midjourney",
   "Stable Diffusion",
@@ -26,6 +27,9 @@ const MODEL_OPTIONS = [
   "Claude 3",
   "Etc",
 ] as const;
+
+const TITLE_MAX = 20;
+const DESCRIPTION_MAX = 200;
 
 type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -153,6 +157,20 @@ export default function EditPromptPage() {
 
   const handleChange = (e: PromptFormEvent) => {
     const { name, value } = e.target;
+    if (name == "title") {
+      setFormData((prev) => ({
+        ...prev,
+        title: value.slice(0, TITLE_MAX),
+      }));
+      return;
+    }
+    if (name == "description") {
+      setFormData((prev) => ({
+        ...prev,
+        description: value.slice(0, DESCRIPTION_MAX),
+      }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -199,16 +217,18 @@ export default function EditPromptPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">
-            제목
-          </label>
+          <label className="mb-2 block font-semibold text-gray-700">제목</label>
+          <p className="mb-2 text-right text-xs text-gray-500">
+            {formData.title.length}/{TITLE_MAX}
+          </p>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             type="text"
+            maxLength={TITLE_MAX}
             placeholder="제목을 입력해주세요"
-            className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-gray-500"
             required
           />
         </div>
@@ -221,7 +241,7 @@ export default function EditPromptPage() {
             name="ai_model"
             value={formData.ai_model}
             onChange={handleChange}
-            className="w-full rounded-lg border bg-white p-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-gray-500"
           >
             {MODEL_OPTIONS.map((model) => (
               <option key={model} value={model}>
@@ -240,7 +260,7 @@ export default function EditPromptPage() {
             value={formData.prompt_text}
             onChange={handleChange}
             placeholder="프롬프트를 입력해주세요"
-            className="h-40 w-full resize-none rounded-lg border bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-black"
+            className="h-30 w-full resize-none rounded-lg border border-gray-300 bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-gray-500"
             required
           />
         </div>
@@ -249,12 +269,16 @@ export default function EditPromptPage() {
           <label className="mb-2 block font-semibold text-gray-700">
             설명 (선택)
           </label>
+          <p className="mb-2 text-right text-xs text-gray-500">
+            {formData.description.length}/{DESCRIPTION_MAX}
+          </p>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
+            maxLength={DESCRIPTION_MAX}
             placeholder="프롬프트 설명을 입력해주세요"
-            className="h-24 w-full resize-none rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
+            className="h-40 w-full resize-none rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
 

@@ -3,10 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import {
-  createPrompt,
-  requireCurrentUser,
-} from "@/lib/data/prompts.client";
+import { createPrompt, requireCurrentUser } from "@/lib/data/prompts.client";
 import {
   CREATE_SUCCESS_MESSAGE,
   CREATE_FAILED_MESSAGE,
@@ -17,13 +14,17 @@ import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
 
 const MODEL_OPTIONS = [
-  "GPT-4",
+  "Gemini",
+  "GPT",
   "Midjourney",
   "Stable Diffusion",
-  "DALL-E 3",
-  "Claude 3",
+  "DALL-E",
+  "Claude",
   "Etc",
 ] as const;
+
+const TITLE_MAX = 20;
+const DESCRIPTION_MAX = 200;
 
 type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
@@ -62,6 +63,20 @@ export default function CreatePromptPage() {
 
   const handleChange = (e: PromptFormEvent) => {
     const { name, value } = e.target;
+    if (name === "title") {
+      setFormData((prev) => ({
+        ...prev,
+        title: value.slice(0, TITLE_MAX),
+      }));
+      return;
+    }
+    if (name === "description") {
+      setFormData((prev) => ({
+        ...prev,
+        description: value.slice(0, DESCRIPTION_MAX),
+      }));
+      return;
+    }
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -86,7 +101,7 @@ export default function CreatePromptPage() {
       });
 
       alert(CREATE_SUCCESS_MESSAGE);
-      router.push("/");
+      router.push("/prompts");
       router.refresh();
     } catch (error: unknown) {
       if (error instanceof Error && error.message === LOGIN_REQUIRED_MESSAGE) {
@@ -108,16 +123,20 @@ export default function CreatePromptPage() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">
-            제목
-          </label>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="block font-semibold text-gray-700">제목</label>
+            <span className="text-xs text-gray-500">
+              {formData.title.length}/{TITLE_MAX}
+            </span>
+          </div>
           <input
             name="title"
             value={formData.title}
             onChange={handleChange}
             type="text"
             placeholder="제목을 입력해주세요"
-            className="w-full rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
+            maxLength={TITLE_MAX}
+            className="w-full rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-gray-500"
             required
           />
         </div>
@@ -130,7 +149,7 @@ export default function CreatePromptPage() {
             name="ai_model"
             value={formData.ai_model}
             onChange={handleChange}
-            className="w-full rounded-lg border bg-white p-3 outline-none focus:ring-2 focus:ring-black"
+            className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-gray-500"
           >
             {MODEL_OPTIONS.map((model) => (
               <option key={model} value={model}>
@@ -149,21 +168,27 @@ export default function CreatePromptPage() {
             value={formData.prompt_text}
             onChange={handleChange}
             placeholder="프롬프트를 입력해주세요"
-            className="h-40 w-full resize-none rounded-lg border bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-black"
+            className="h-30 w-full resize-none rounded-lg border border-gray-300 bg-gray-50 p-3 font-mono text-sm outline-none focus:ring-2 focus:ring-gray-500"
             required
           />
         </div>
 
         <div>
-          <label className="mb-2 block font-semibold text-gray-700">
-            설명 (선택)
-          </label>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="block font-semibold text-gray-700">
+              설명 (선택)
+            </label>
+            <span className="text-xs text-gray-500">
+              {formData.description.length}/{DESCRIPTION_MAX}
+            </span>
+          </div>
           <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             placeholder="프롬프트 설명을 입력해주세요"
-            className="h-24 w-full resize-none rounded-lg border p-3 outline-none focus:ring-2 focus:ring-black"
+            maxLength={DESCRIPTION_MAX}
+            className="h-40 w-full resize-none rounded-lg border border-gray-300 p-3 outline-none focus:ring-2 focus:ring-gray-500"
           />
         </div>
 
@@ -211,4 +236,3 @@ export default function CreatePromptPage() {
     </main>
   );
 }
-
