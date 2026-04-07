@@ -35,9 +35,7 @@ export default function DbPromptsInfinite({
   const [items, setItems] = useState<PromptListItem[]>(initialPrompts);
   const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(
-    initialPrompts.length === pageSize,
-  );
+  const [hasMore, setHasMore] = useState(initialPrompts.length === pageSize);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
   const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
@@ -112,7 +110,7 @@ export default function DbPromptsInfinite({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
             {items.map((prompt) => (
               <PromptCard
                 key={prompt.id}

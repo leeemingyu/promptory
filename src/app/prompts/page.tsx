@@ -1,4 +1,5 @@
 ﻿import Link from "next/link";
+import { X } from "lucide-react";
 import ModelFilter from "@/app/prompts/ModelFilter";
 import MockPromptsInfinite from "@/app/prompts/MockPromptsInfinite";
 import DbPromptsInfinite from "@/app/prompts/DbPromptsInfinite";
@@ -10,11 +11,12 @@ import {
 } from "@/lib/data/prompts.server";
 
 const MODEL_OPTIONS = [
-  "GPT-4",
+  "GEMINI",
+  "GPT",
   "Midjourney",
   "Stable Diffusion",
-  "DALL-E 3",
-  "Claude 3",
+  "DALL-E",
+  "Claude",
   "Etc",
 ];
 
@@ -94,13 +96,24 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
         {isPerfTest && <input type="hidden" name="perf_test" value="true" />}
         {modelValue && <input type="hidden" name="model" value={modelValue} />}
         {sort !== "latest" && <input type="hidden" name="sort" value={sort} />}
-        <input
-          type="text"
-          name="q"
-          defaultValue={queryValue}
-          placeholder="검색어를 입력해주세요"
-          className="w-full rounded-lg border border-gray-300 p-3 text-sm outline-none focus:ring-2 focus:ring-black"
-        />
+        <div className="relative w-full">
+          <input
+            type="text"
+            name="q"
+            defaultValue={queryValue}
+            placeholder="검색어를 입력해주세요"
+            className="w-full rounded-lg border border-gray-300 p-3 pr-10 text-sm outline-none focus:ring-2 focus:ring-gray-500"
+          />
+          {queryValue && (
+            <Link
+              href={buildHref({ sort, q: "", model: modelValue })}
+              aria-label="검색어 지우기"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-400 transition hover:text-gray-700"
+            >
+              <X className="h-4 w-4" />
+            </Link>
+          )}
+        </div>
       </form>
 
       <div className="grid grid-cols-1 items-start gap-8 sm:grid-cols-4">

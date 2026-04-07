@@ -35,7 +35,7 @@ export default function ModelFilter({
       name="model"
       value={value}
       onChange={handleChange}
-      className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-black"
+      className="w-full rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-gray-500"
     >
       <option value="">전체</option>
       {options.map((model) => (
