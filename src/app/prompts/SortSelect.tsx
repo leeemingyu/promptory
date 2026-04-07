@@ -32,7 +32,7 @@ export default function SortSelect({
     <select
       value={value}
       onChange={handleChange}
-      className="rounded-lg border border-gray-300 bg-white p-3 text-sm outline-none focus:ring-2 focus:ring-black"
+      className="rounded-lg border border-gray-300 bg-white p-2 text-sm outline-none focus:ring-2 focus:ring-gray-500"
     >
       <option value="latest">최신순</option>
       <option value="popular">인기순</option>
