@@ -1,7 +1,7 @@
 ﻿import PromptActions from "@/app/prompts/[id]/PromptActions";
 import LikeButton from "@/app/prompts/[id]/LikeButton";
 import CopyButton from "@/app/prompts/[id]/CopyButton";
-import BackButton from "@/app/prompts/[id]/BackButton";
+import PromptText from "@/app/prompts/[id]/PromptText";
 import {
   getCurrentUserId,
   getPromptById,
@@ -10,10 +10,11 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ChevronLeft } from "lucide-react";
 
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
-  searchParams?: Promise<{ sort?: string; q?: string; model?: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }
 
 export default async function PromptDetailPage({
@@ -21,19 +22,19 @@ export default async function PromptDetailPage({
   searchParams,
 }: PromptDetailPageProps) {
   const { id } = await params;
-  const resolvedSearchParams = await searchParams;
-  const backParams = new URLSearchParams();
-  if (resolvedSearchParams?.sort) {
-    backParams.set("sort", resolvedSearchParams.sort);
-  }
-  if (resolvedSearchParams?.q) {
-    backParams.set("q", resolvedSearchParams.q);
-  }
-  if (resolvedSearchParams?.model) {
-    backParams.set("model", resolvedSearchParams.model);
-  }
-  const backHref = backParams.toString()
-    ? `/prompts?${backParams.toString()}`
+  const resolvedSearchParams = (await searchParams) ?? {};
+  const browseParams = new URLSearchParams();
+  Object.entries(resolvedSearchParams).forEach(([key, value]) => {
+    if (typeof value === "string") {
+      browseParams.set(key, value);
+      return;
+    }
+    if (Array.isArray(value)) {
+      value.forEach((item) => browseParams.append(key, item));
+    }
+  });
+  const browseHref = browseParams.toString()
+    ? `/prompts?${browseParams.toString()}`
     : "/prompts";
 
   const promptRow = await getPromptById(id);
@@ -54,11 +55,11 @@ export default async function PromptDetailPage({
     <main className="mx-auto max-w-6xl md:p-6">
       <div className="mb-6">
         <div className="flex flex-wrap items-center gap-2">
-          <BackButton fallbackHref={backHref} />
           <Link
-            href="/prompts"
-            className="inline-flex items-center rounded-lg bg-black text-white border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-800"
+            href={browseHref}
+            className="inline-flex items-center rounded-lg text-gray-700 border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-50"
           >
+            <ChevronLeft size={18} />
             모든 프롬프트 둘러보기
           </Link>
         </div>
@@ -100,18 +101,6 @@ export default async function PromptDetailPage({
             </div>
           </div>
 
-          <div className="relative rounded-xl bg-gray-50 p-6">
-            <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-              프롬프트
-            </h3>
-            <div className="absolute right-4 top-4">
-              <CopyButton text={prompt.prompt_text} />
-            </div>
-            <p className="whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
-              {prompt.prompt_text}
-            </p>
-          </div>
-
           {prompt.description && (
             <div className="rounded-xl bg-gray-50 p-6">
               <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
@@ -122,6 +111,15 @@ export default async function PromptDetailPage({
               </p>
             </div>
           )}
+          <div className="relative rounded-xl bg-gray-50 p-6 pb-3">
+            <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
+              프롬프트
+            </h3>
+            <div className="absolute right-4 top-4">
+              <CopyButton text={prompt.prompt_text} />
+            </div>
+            <PromptText text={prompt.prompt_text} />
+          </div>
         </div>
       </div>
     </main>
