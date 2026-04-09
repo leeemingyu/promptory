@@ -1,13 +1,13 @@
 ﻿import type { Metadata } from "next";
-import PromptActions from "@/app/prompts/[id]/PromptActions";
-import LikeButton from "@/app/prompts/[id]/LikeButton";
-import CopyButton from "@/app/prompts/[id]/CopyButton";
-import PromptText from "@/app/prompts/[id]/PromptText";
+import { LikeButton, PromptActions } from "@/features/prompts";
+
+import { CopyButton, PromptText } from "@/features/prompts";
+
 import {
   getCurrentUserId,
   getPromptById,
   isPromptLiked,
-} from "@/lib/data/prompts.server";
+} from "@/features/prompts/services/prompts.server";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -162,3 +162,5 @@ export default async function PromptDetailPage({
     </main>
   );
 }
+
+

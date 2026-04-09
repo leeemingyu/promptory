@@ -3,8 +3,8 @@
 import { useState } from "react";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
-import { mapRegisterErrorMessage } from "@/lib/auth/error-mapping";
-import { LOGIN_FAILED_MESSAGE } from "@/lib/data/messages";
+import { mapRegisterErrorMessage } from "@/features/auth";
+import { LOGIN_FAILED_MESSAGE } from "@/utils/messages";
 
 export default function LoginPage() {
   const supabase = createClient();
@@ -68,3 +68,4 @@ export default function LoginPage() {
     </main>
   );
 }
+

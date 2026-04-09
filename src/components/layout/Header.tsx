@@ -1,7 +1,7 @@
 ﻿import Link from "next/link";
 import LogoutButton from "@/components/layout/LogoutButton";
 import MobileMenu from "@/components/layout/MobileMenu";
-import { getCurrentUserProfile } from "@/lib/data/profiles.server";
+import { getCurrentUserProfile } from "@/features/profiles/services/profiles.server";
 
 export default async function Header() {
   const profile = await getCurrentUserProfile();

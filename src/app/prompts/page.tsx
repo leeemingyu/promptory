@@ -1,16 +1,16 @@
 ﻿import type { Metadata } from "next";
 import Link from "next/link";
 import { X } from "lucide-react";
-import ModelFilter from "@/app/prompts/ModelFilter";
-import MockPromptsInfinite from "@/app/prompts/MockPromptsInfinite";
-import DbPromptsInfinite from "@/app/prompts/DbPromptsInfinite";
+import { DbPromptsInfinite, MockPromptsInfinite, ModelFilter } from "@/features/prompts";
+
+
+import type { PromptSort } from "@/features/prompts/types";
 import {
   getCurrentUserId,
   getLikedPromptIds,
   getPromptsPage,
-  type PromptSort,
-} from "@/lib/data/prompts.server";
-import { PROMPT_MODEL_OPTIONS } from "@/lib/data/prompt-models";
+} from "@/features/prompts/services/prompts.server";
+import { PROMPT_MODEL_OPTIONS } from "@/features/prompts";
 
 export const metadata: Metadata = {
   title: "\uc804\uccb4 \ud504\ub86c\ud504\ud2b8",
@@ -178,3 +178,5 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
     </main>
   );
 }
+
+

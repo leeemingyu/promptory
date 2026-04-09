@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -8,18 +8,18 @@ import {
   getPromptForEdit,
   requireCurrentUser,
   updatePrompt,
-} from "@/lib/data/prompts.client";
+} from "@/features/prompts/services/prompts.client";
 import {
   LOGIN_REQUIRED_MESSAGE,
   UPDATE_FAILED_MESSAGE,
   IMAGE_REQUIRED_MESSAGE,
-} from "@/lib/data/messages";
-import { uploadImage } from "@/lib/uploadImage";
-import type { CreatePromptInput } from "@/types";
+} from "@/utils/messages";
+import { uploadImage } from "@/features/prompts/services/upload-image";
+import type { CreatePromptInput } from "@/features/prompts/types";
 import {
   DEFAULT_PROMPT_MODEL,
   PROMPT_MODEL_OPTIONS,
-} from "@/lib/data/prompt-models";
+} from "@/features/prompts";
 
 const TITLE_MAX = 20;
 const DESCRIPTION_MAX = 200;
@@ -319,3 +319,5 @@ export default function EditPromptPage() {
     </main>
   );
 }
+
+

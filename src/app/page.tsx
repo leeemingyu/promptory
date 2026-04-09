@@ -1,10 +1,10 @@
 ﻿import Link from "next/link";
-import PromptCard from "@/components/prompts/PromptCard";
+import { PromptCard } from "@/features/prompts";
 import {
   getCurrentUserId,
   getLikedPromptIds,
   getPopularPromptsCached,
-} from "@/lib/data/prompts.server";
+} from "@/features/prompts/services/prompts.server";
 
 export default async function HomePage() {
   const prompts = await getPopularPromptsCached();
@@ -55,3 +55,4 @@ export default async function HomePage() {
     </main>
   );
 }
+

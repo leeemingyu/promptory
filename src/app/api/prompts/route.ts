@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getPromptsPage } from "@/lib/data/prompts.server";
+import { getPromptsPage } from "@/features/prompts/services/prompts.server";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

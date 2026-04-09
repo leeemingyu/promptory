@@ -3,18 +3,21 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { createPrompt, requireCurrentUser } from "@/lib/data/prompts.client";
+import {
+  createPrompt,
+  requireCurrentUser,
+} from "@/features/prompts/services/prompts.client";
 import {
   CREATE_FAILED_MESSAGE,
   LOGIN_REQUIRED_MESSAGE,
   IMAGE_REQUIRED_MESSAGE,
-} from "@/lib/data/messages";
-import { uploadImage } from "@/lib/uploadImage";
-import type { CreatePromptInput } from "@/types";
+} from "@/utils/messages";
+import { uploadImage } from "@/features/prompts/services/upload-image";
+import type { CreatePromptInput } from "@/features/prompts/types";
 import {
   DEFAULT_PROMPT_MODEL,
   PROMPT_MODEL_OPTIONS,
-} from "@/lib/data/prompt-models";
+} from "@/features/prompts";
 
 const TITLE_MAX = 20;
 const DESCRIPTION_MAX = 200;
@@ -228,3 +231,5 @@ export default function CreatePromptPage() {
     </main>
   );
 }
+
+
