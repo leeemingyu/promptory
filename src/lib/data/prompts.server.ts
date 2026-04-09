@@ -19,15 +19,29 @@ type PromptRow = {
 
 export type PromptSort = "latest" | "oldest" | "popular";
 
+const UUID_REGEX =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+
 function logServerError(action: string, error: unknown) {
   console.error(`[prompts.server] ${action}`, error);
+}
+
+function isAuthSessionMissing(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error && typeof error.message === "string"
+      ? error.message
+      : "";
+  return message.includes("Auth session missing");
 }
 
 export async function getCurrentUserId(): Promise<string | null> {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.getUser();
   if (error) {
-    logServerError("getCurrentUserId", error);
+    if (!isAuthSessionMissing(error)) {
+      logServerError("getCurrentUserId", error);
+    }
     return null;
   }
   return data.user?.id ?? null;
@@ -44,9 +58,11 @@ export async function getPrompts(options?: {
   const model = options?.model?.trim();
   const limit = options?.limit;
   const supabase = await createClient();
-  let queryBuilder = supabase.from("prompts").select(
-    "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
-  );
+  let queryBuilder = supabase
+    .from("prompts")
+    .select(
+      "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
+    );
 
   if (query) {
     queryBuilder = queryBuilder.or(
@@ -182,6 +198,7 @@ export async function getPromptModels(): Promise<string[]> {
 }
 
 export async function getPromptById(id: string): Promise<PromptRow | null> {
+  if (!UUID_REGEX.test(id)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("prompts")

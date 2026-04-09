@@ -13,6 +13,15 @@ function logServerError(action: string, error: unknown) {
   console.error(`[profiles.server] ${action}`, error);
 }
 
+function isAuthSessionMissing(error: unknown): boolean {
+  if (!error || typeof error !== "object") return false;
+  const message =
+    "message" in error && typeof error.message === "string"
+      ? error.message
+      : "";
+  return message.includes("Auth session missing");
+}
+
 export const getProfileByUserId = cache(
   async (userId: string): Promise<ProfileRow | null> => {
     const supabase = await createClient();
@@ -36,7 +45,9 @@ export const getCurrentUserProfile = cache(
     const supabase = await createClient();
     const { data, error } = await supabase.auth.getUser();
     if (error || !data.user) {
-      if (error) logServerError("getCurrentUserProfile", error);
+      if (error && !isAuthSessionMissing(error)) {
+        logServerError("getCurrentUserProfile", error);
+      }
       return null;
     }
 

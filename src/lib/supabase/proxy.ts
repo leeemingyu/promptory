@@ -40,6 +40,23 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
 
   const user = data?.claims;
+  const hasAuthCookies = request.cookies
+    .getAll()
+    .some(
+      ({ name }) =>
+        name.startsWith("sb-") &&
+        (name.includes("auth") ||
+          name.includes("access") ||
+          name.includes("refresh")),
+    );
+
+  if (!user && hasAuthCookies) {
+    try {
+      await supabase.auth.signOut();
+    } catch {
+      // ignore signOut failures for stale sessions
+    }
+  }
 
   const pathname = request.nextUrl.pathname;
   const isPublicPath =
