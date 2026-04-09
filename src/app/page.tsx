@@ -46,7 +46,7 @@ export default async function HomePage() {
               key={prompt.id}
               prompt={prompt}
               href={`/prompts/${prompt.id}`}
-              showLike={Boolean(currentUserId)}
+              showLike={true}
               liked={likedSet.has(prompt.id)}
             />
           ))}

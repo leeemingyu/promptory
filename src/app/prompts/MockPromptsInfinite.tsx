@@ -155,7 +155,7 @@ export default function MockPromptsInfinite({
                 key={prompt.id}
                 prompt={prompt}
                 href={buildHref({ sort, q: query, model })}
-                showLike={false}
+                showLike={true}
                 liked={false}
               />
             ))}

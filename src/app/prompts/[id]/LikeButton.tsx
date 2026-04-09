@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { Heart } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toggleLike } from "@/lib/data/prompts.client";
 import { LIKE_FAILED_MESSAGE } from "@/lib/data/messages";
 
@@ -18,6 +18,10 @@ export default function LikeButton({
 }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    setLiked(initialLiked);
+  }, [initialLiked]);
 
   const handleToggle = async (event?: React.MouseEvent<HTMLButtonElement>) => {
     if (event) {

@@ -179,7 +179,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
               sort={sort}
               pageSize={pageSize}
               likedIds={likedPromptIds}
-              showLike={Boolean(currentUserId)}
+              showLike={true}
             />
           )}
         </section>
