@@ -41,12 +41,6 @@ export default async function Header() {
               >
                 로그인
               </Link>
-              <Link
-                href="/register"
-                className="rounded border border-gray-300 px-3 py-1.5 text-sm hover:bg-gray-50"
-              >
-                회원가입
-              </Link>
             </>
           )}
         </div>

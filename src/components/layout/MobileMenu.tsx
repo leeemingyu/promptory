@@ -77,13 +77,6 @@ export default function MobileMenu({ isAuthed, nickname }: MobileMenuProps) {
                 >
                   로그인
                 </Link>
-                <Link
-                  href="/register"
-                  className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50"
-                  onClick={() => setOpen(false)}
-                >
-                  회원가입
-                </Link>
               </>
             )}
           </div>

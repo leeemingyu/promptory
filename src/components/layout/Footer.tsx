@@ -20,9 +20,6 @@ export default function Footer() {
             <Link href="/login" className="transition hover:text-black">
               로그인
             </Link>
-            <Link href="/register" className="transition hover:text-black">
-              회원가입
-            </Link>
           </div>
         </div>
 
