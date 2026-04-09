@@ -1,7 +1,4 @@
-import {
-  EMAIL_NOT_CONFIRMED_MESSAGE,
-  RATE_LIMIT_MESSAGE,
-} from "@/lib/data/messages";
+import { RATE_LIMIT_MESSAGE } from "@/lib/data/messages";
 
 type AuthErrorLike = {
   message?: string | null;
@@ -16,12 +13,6 @@ export const mapLoginErrorMessage = (
   fallback: string,
 ) => {
   const rawMessage = getRawMessage(error);
-  if (
-    rawMessage.includes("email not confirmed") ||
-    rawMessage.includes("email_not_confirmed")
-  ) {
-    return EMAIL_NOT_CONFIRMED_MESSAGE;
-  }
   if (error?.status === 429 || rawMessage.includes("too many")) {
     return RATE_LIMIT_MESSAGE;
   }

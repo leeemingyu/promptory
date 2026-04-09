@@ -5,7 +5,6 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { createPrompt, requireCurrentUser } from "@/lib/data/prompts.client";
 import {
-  CREATE_SUCCESS_MESSAGE,
   CREATE_FAILED_MESSAGE,
   LOGIN_REQUIRED_MESSAGE,
   IMAGE_REQUIRED_MESSAGE,
@@ -100,7 +99,6 @@ export default function CreatePromptPage() {
         user,
       });
 
-      alert(CREATE_SUCCESS_MESSAGE);
       router.push("/prompts");
       router.refresh();
     } catch (error: unknown) {

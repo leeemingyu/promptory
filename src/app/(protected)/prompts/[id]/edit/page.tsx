@@ -11,7 +11,6 @@ import {
 } from "@/lib/data/prompts.client";
 import {
   LOGIN_REQUIRED_MESSAGE,
-  UPDATE_SUCCESS_MESSAGE,
   UPDATE_FAILED_MESSAGE,
   IMAGE_REQUIRED_MESSAGE,
 } from "@/lib/data/messages";
@@ -35,8 +34,9 @@ type PromptFormEvent = React.ChangeEvent<
   HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
 >;
 
-const PERMISSION_DENIED_MESSAGE = "본인 프롬프트만 수정할 수 있습니다.";
-const NOT_FOUND_MESSAGE = "프롬프트를 찾을 수 없습니다.";
+const PERMISSION_DENIED_MESSAGE =
+  "\ub0b4\uac00 \uc791\uc131\ud55c \ud504\ub86c\ud504\ud2b8\ub9cc \uc218\uc815\ud560 \uc218 \uc788\uc5b4\uc694.";
+const NOT_FOUND_MESSAGE = "\ud504\ub86c\ud504\ud2b8\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc5b4\uc694.";
 export default function EditPromptPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -197,7 +197,6 @@ export default function EditPromptPage() {
         userId: user.id,
       });
 
-      alert(UPDATE_SUCCESS_MESSAGE);
       router.push(`/prompts/${promptId}`);
       router.refresh();
     } catch (error: unknown) {

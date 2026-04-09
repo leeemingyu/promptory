@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useRouter } from "next/navigation";
 import { deletePrompt } from "@/lib/data/prompts.client";
@@ -6,6 +6,7 @@ import { DELETE_FAILED_MESSAGE } from "@/lib/data/messages";
 import type { PromptActionsProps } from "@/types";
 
 const DELETE_CONFIRM_MESSAGE = "이 프롬프트를 삭제할까요?";
+
 export default function PromptActions({
   promptId,
   canEdit,

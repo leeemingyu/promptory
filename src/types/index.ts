@@ -25,16 +25,6 @@ export interface CreatePromptInput {
 
 export type UpdatePromptInput = Partial<CreatePromptInput>;
 
-export interface RegisterFormData {
-  email: string;
-  password: string;
-}
-
-export interface LoginFormData {
-  email: string;
-  password: string;
-}
-
 export interface PromptActionsProps {
   promptId: string;
   canEdit: boolean;
