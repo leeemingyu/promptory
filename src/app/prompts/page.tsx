@@ -1,4 +1,5 @@
-﻿import Link from "next/link";
+﻿import type { Metadata } from "next";
+import Link from "next/link";
 import { X } from "lucide-react";
 import ModelFilter from "@/app/prompts/ModelFilter";
 import MockPromptsInfinite from "@/app/prompts/MockPromptsInfinite";
@@ -19,6 +20,21 @@ const MODEL_OPTIONS = [
   "Claude",
   "Etc",
 ];
+
+export const metadata: Metadata = {
+  title: "\uc804\uccb4 \ud504\ub86c\ud504\ud2b8",
+  description: "AI \ud504\ub86c\ud504\ud2b8\ub97c \uac80\uc0c9\ub7a8\ud2f0\ub7ec\uc640 \uac80\uc0c9\uc21c \uc870\uc815\uc744 \ud1b5\ud574 \uc6d0\ud558\ub294 \ud504\ub86c\ud504\ud2b8\ub97c \ube60\ub974\uac8c \ucc3e\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4.",
+  openGraph: {
+    title: "\uc804\uccb4 \ud504\ub86c\ud504\ud2b8 | Promptory",
+    description: "AI \ud504\ub86c\ud504\ud2b8\ub97c \uac80\uc0c9\ub7a8\ud2f0\ub7ec\uc640 \uac80\uc0c9\uc21c \uc870\uc815\uc744 \ud1b5\ud574 \uc6d0\ud558\ub294 \ud504\ub86c\ud504\ud2b8\ub97c \ube60\ub974\uac8c \ucc3e\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4.",
+    url: "/prompts",
+  },
+  twitter: {
+    title: "\uc804\uccb4 \ud504\ub86c\ud504\ud2b8 | Promptory",
+    description: "AI \ud504\ub86c\ud504\ud2b8\ub97c \uac80\uc0c9\ub7a8\ud2f0\ub7ec\uc640 \uac80\uc0c9\uc21c \uc870\uc815\uc744 \ud1b5\ud574 \uc6d0\ud558\ub294 \ud504\ub86c\ud504\ud2b8\ub97c \ube60\ub974\uac8c \ucc3e\uc744 \uc218 \uc788\uc2b5\ub2c8\ub2e4.",
+  },
+};
+
 
 type PromptsPageProps = {
   searchParams?: Promise<{

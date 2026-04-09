@@ -1,4 +1,5 @@
-﻿import PromptActions from "@/app/prompts/[id]/PromptActions";
+﻿import type { Metadata } from "next";
+import PromptActions from "@/app/prompts/[id]/PromptActions";
 import LikeButton from "@/app/prompts/[id]/LikeButton";
 import CopyButton from "@/app/prompts/[id]/CopyButton";
 import PromptText from "@/app/prompts/[id]/PromptText";
@@ -15,6 +16,58 @@ import { ChevronLeft } from "lucide-react";
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
   searchParams?: Promise<Record<string, string | string[] | undefined>>;
+}
+
+const buildDescription = (value: string) => {
+  const trimmed = value.trim();
+  if (trimmed.length <= 120) return trimmed;
+  return `${trimmed.slice(0, 120)}\u2026`;
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: { id: string };
+}): Promise<Metadata> {
+  const prompt = await getPromptById(params.id);
+  if (!prompt) {
+    return {
+      title: "\ud504\ub86c\ud504\ud2b8 \uc0c1\uc138",
+      description: "\uc120\ud0dd\ud55c \ud504\ub86c\ud504\ud2b8\uc758 \uc0c1\uc138 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uc138\uc694.",
+      openGraph: {
+        title: "\ud504\ub86c\ud504\ud2b8 \uc0c1\uc138 | Promptory",
+        description: "\uc120\ud0dd\ud55c \ud504\ub86c\ud504\ud2b8\uc758 \uc0c1\uc138 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        url: `/prompts/${params.id}`,
+        images: ["/og.png"],
+      },
+      twitter: {
+        title: "\ud504\ub86c\ud504\ud2b8 \uc0c1\uc138 | Promptory",
+        description: "\uc120\ud0dd\ud55c \ud504\ub86c\ud504\ud2b8\uc758 \uc0c1\uc138 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uc138\uc694.",
+        images: ["/og.png"],
+      },
+    };
+  }
+
+  const descriptionSource = prompt.description || prompt.prompt_text || "";
+  const description = descriptionSource
+    ? buildDescription(descriptionSource)
+    : "\uc120\ud0dd\ud55c \ud504\ub86c\ud504\ud2b8\uc758 \uc0c1\uc138 \uc815\ubcf4\ub97c \ud655\uc778\ud558\uc138\uc694.";
+
+  return {
+    title: `${prompt.title} | Promptory`,
+    description,
+    openGraph: {
+      title: `${prompt.title} | Promptory`,
+      description,
+      url: `/prompts/${prompt.id}`,
+      images: [prompt.sample_image_url || "/og.png"],
+    },
+    twitter: {
+      title: `${prompt.title} | Promptory`,
+      description,
+      images: [prompt.sample_image_url || "/og.png"],
+    },
+  };
 }
 
 export default async function PromptDetailPage({
