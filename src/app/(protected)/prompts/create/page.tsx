@@ -11,16 +11,10 @@ import {
 } from "@/lib/data/messages";
 import { uploadImage } from "@/lib/uploadImage";
 import type { CreatePromptInput } from "@/types";
-
-const MODEL_OPTIONS = [
-  "Gemini",
-  "GPT",
-  "Midjourney",
-  "Stable Diffusion",
-  "DALL-E",
-  "Claude",
-  "Etc",
-] as const;
+import {
+  DEFAULT_PROMPT_MODEL,
+  PROMPT_MODEL_OPTIONS,
+} from "@/lib/data/prompt-models";
 
 const TITLE_MAX = 20;
 const DESCRIPTION_MAX = 200;
@@ -39,7 +33,7 @@ export default function CreatePromptPage() {
     title: "",
     prompt_text: "",
     description: "",
-    ai_model: "GPT-4",
+    ai_model: DEFAULT_PROMPT_MODEL,
   });
 
   useEffect(() => {
@@ -149,7 +143,7 @@ export default function CreatePromptPage() {
             onChange={handleChange}
             className="w-full rounded-lg border border-gray-300 bg-white p-3 outline-none focus:ring-2 focus:ring-gray-500"
           >
-            {MODEL_OPTIONS.map((model) => (
+            {PROMPT_MODEL_OPTIONS.map((model) => (
               <option key={model} value={model}>
                 {model}
               </option>

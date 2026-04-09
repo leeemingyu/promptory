@@ -10,16 +10,7 @@ import {
   getPromptsPage,
   type PromptSort,
 } from "@/lib/data/prompts.server";
-
-const MODEL_OPTIONS = [
-  "GEMINI",
-  "GPT",
-  "Midjourney",
-  "Stable Diffusion",
-  "DALL-E",
-  "Claude",
-  "Etc",
-];
+import { PROMPT_MODEL_OPTIONS } from "@/lib/data/prompt-models";
 
 export const metadata: Metadata = {
   title: "\uc804\uccb4 \ud504\ub86c\ud504\ud2b8",
@@ -140,7 +131,7 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
               AI 모델
             </label>
             <ModelFilter
-              options={MODEL_OPTIONS}
+              options={PROMPT_MODEL_OPTIONS}
               value={modelValue}
               query={queryValue}
               sort={sort}

@@ -4,15 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import PromptCard from "@/components/prompts/PromptCard";
 import SortSelect from "@/app/prompts/SortSelect";
 import type { PromptSort } from "@/lib/data/prompts.server";
-
-const MODEL_OPTIONS = [
-  "GPT-4",
-  "Midjourney",
-  "Stable Diffusion",
-  "DALL-E 3",
-  "Claude 3",
-  "Etc",
-];
+import { PROMPT_MODEL_OPTIONS } from "@/lib/data/prompt-models";
 
 type MockPrompt = {
   id: string;
@@ -37,7 +29,7 @@ type MockPromptsInfiniteProps = {
 const generateMockPrompts = (count: number): MockPrompt[] =>
   Array.from({ length: count }, (_, index) => {
     const order = index + 1;
-    const model = MODEL_OPTIONS[index % MODEL_OPTIONS.length];
+    const model = PROMPT_MODEL_OPTIONS[index % PROMPT_MODEL_OPTIONS.length];
     const createdAt = new Date(
       Date.now() - index * 1000 * 60 * 60,
     ).toISOString();
