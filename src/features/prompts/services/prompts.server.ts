@@ -251,4 +251,3 @@ export async function getLikedPromptIds(userId: string): Promise<string[]> {
     .map((row) => row.prompt_id)
     .filter((promptId): promptId is string => typeof promptId === "string");
 }
-

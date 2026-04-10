@@ -14,12 +14,20 @@ export default async function Header() {
           PROMPTORY
         </Link>
 
-        <Link
-          href="/prompts"
-          className="absolute left-1/2 hidden -translate-x-1/2 text-sm font-semibold text-gray-800 hover:text-black sm:inline-flex"
-        >
-          전체 프롬프트
-        </Link>
+        <nav className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-6 sm:flex">
+          <Link
+            href="/prompts"
+            className="text-sm font-semibold text-gray-800 hover:text-black"
+          >
+            전체 프롬프트
+          </Link>
+          <Link
+            href="/rankings"
+            className="text-sm font-semibold text-gray-800 hover:text-black"
+          >
+            사용자 랭킹
+          </Link>
+        </nav>
 
         <div className="hidden items-center gap-4 sm:flex">
           {profile ? (
