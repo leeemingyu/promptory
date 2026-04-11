@@ -1,7 +1,11 @@
 ﻿import type { Metadata } from "next";
-import { LikeButton, PromptActions } from "@/features/prompts";
-
-import { CopyButton, PromptText } from "@/features/prompts";
+import {
+  CopyButton,
+  LikeButton,
+  LocalRelativeTime,
+  PromptMoreMenu,
+  PromptText,
+} from "@/features/prompts";
 
 import {
   getCurrentUserId,
@@ -97,7 +101,7 @@ export default async function PromptDetailPage({
             className="inline-flex items-center rounded-lg text-gray-700 border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-50"
           >
             <ChevronLeft size={18} />
-            모든 프롬프트 둘러보기
+            프롬프트 목록
           </Link>
         </div>
       </div>
@@ -119,36 +123,36 @@ export default async function PromptDetailPage({
         </div>
 
         <div className="space-y-6">
-          <div>
-            <h1 className="text-3xl font-bold">{prompt.title}</h1>
-            <div className="mt-2 flex flex-wrap items-center gap-2 text-gray-500">
-              <span>
-                작성자 <strong>{prompt.nickname}</strong>
-              </span>
-              <span>|</span>
-              <span>{new Date(prompt.created_at).toLocaleDateString()}</span>
-              <span className="ml-auto bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">
-                {prompt.ai_model}
-              </span>
-            </div>
-
-            <div className="mt-4 flex flex-wrap items-center gap-2">
-              <LikeButton promptId={prompt.id} initialLiked={initialLiked} />
-              <PromptActions promptId={prompt.id} canEdit={canEdit} />
-            </div>
+          <div className="flex justify-between items-center gap-4">
+            <h1 className="text-3xl leading-normal font-bold">
+              {prompt.title}
+            </h1>
+            <LikeButton
+              promptId={prompt.id}
+              initialLiked={initialLiked}
+              size="lg"
+            />
+          </div>
+          <div className="mt-4 flex items-center">
+            <Link
+              href={`/prompts?model=${encodeURIComponent(prompt.ai_model)}`}
+              className="bg-gray-100 text-gray-500 text-xs font-bold px-2.5 py-1 rounded-lg hover:bg-gray-200 transition cursor-pointer"
+            >
+              {prompt.ai_model}
+            </Link>
           </div>
 
-          {prompt.description && (
-            <div className="rounded-xl bg-gray-50 p-6">
-              <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
-                설명
-              </h3>
-              <p className="whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
-                {prompt.description}
-              </p>
+          <div className="mt-8 flex items-center justify-between">
+            <div className="flex flex-col gap-1 text-gray-500">
+              <span className="font-bold text-gray-600">{prompt.nickname}</span>
+              <LocalRelativeTime value={prompt.created_at} />
             </div>
-          )}
-          <div className="relative rounded-xl bg-gray-50 p-6 pb-3">
+            {canEdit ? (
+              <PromptMoreMenu promptId={prompt.id} canEdit={canEdit} />
+            ) : null}
+          </div>
+
+          <div className="relative rounded-xl bg-gray-100 p-6 pb-3">
             <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400">
               프롬프트
             </h3>
@@ -157,10 +161,16 @@ export default async function PromptDetailPage({
             </div>
             <PromptText text={prompt.prompt_text} />
           </div>
+          {prompt.description && (
+            <div className="">
+              <h3 className="mb-3 text-sm font-semibold uppercase text-gray-400"></h3>
+              <p className="whitespace-pre-wrap text-lg leading-relaxed text-gray-800">
+                {prompt.description}
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </main>
   );
 }
-
-

@@ -49,7 +49,6 @@ export default function PromptCard({
               <LikeButton
                 promptId={prompt.id}
                 initialLiked={liked}
-                variant="icon"
               />
             )}
           </div>

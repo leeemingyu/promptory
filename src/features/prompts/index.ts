@@ -8,6 +8,9 @@ export { default as MockPromptsInfinite } from "./components/mock-prompts-infini
 export { default as CopyButton } from "./components/copy-button";
 export { default as PromptText } from "./components/prompt-text";
 export { default as BackButton } from "./components/back-button";
+export { default as LocalDate } from "./components/local-date";
+export { default as LocalRelativeTime } from "./components/local-relative-time";
+export { default as PromptMoreMenu } from "./components/prompt-more-menu";
 
 export {
   DEFAULT_PROMPT_MODEL,

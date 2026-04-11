@@ -8,13 +8,13 @@ import { LIKE_FAILED_MESSAGE } from "@/utils/messages";
 type LikeButtonProps = {
   promptId: string;
   initialLiked?: boolean;
-  variant?: "default" | "icon";
+  size?: "sm" | "md" | "lg";
 };
 
 export default function LikeButton({
   promptId,
   initialLiked = false,
-  variant = "default",
+  size = "md",
 }: LikeButtonProps) {
   const [liked, setLiked] = useState(initialLiked);
   const [isLoading, setIsLoading] = useState(false);
@@ -46,6 +46,12 @@ export default function LikeButton({
     }
   };
 
+  const iconSizeClass =
+    size === "sm" ? "h-4 w-4" : size === "lg" ? "h-5 w-5" : "h-4 w-4";
+
+  const buttonSizeClass =
+    size === "sm" ? "p-1.5" : size === "lg" ? "p-2.5" : "p-2";
+
   return (
     <button
       type="button"
@@ -53,30 +59,18 @@ export default function LikeButton({
       disabled={isLoading}
       aria-pressed={liked}
       aria-label="좋아요"
-      className={`relative inline-flex cursor-pointer items-center justify-center transition ${
-        variant === "icon"
-          ? `group rounded-full p-2 ${
-              liked ? "text-rose-600" : "text-gray-500 hover:text-rose-500"
-            }`
-          : `gap-2 rounded-full border px-3 py-1.5 text-sm font-medium ${
-              liked
-                ? "border-rose-500 bg-rose-50 text-rose-600"
-                : "border-gray-200 text-gray-600 hover:bg-gray-50"
-            }`
-      } ${isLoading ? "cursor-not-allowed opacity-70" : ""}`}
+      className={`relative inline-flex cursor-pointer items-center justify-center transition ${`group rounded-full ${buttonSizeClass} ${
+        liked ? "text-rose-600" : "text-gray-500 hover:text-rose-500"
+      }`} ${isLoading ? "cursor-not-allowed opacity-70" : ""}`}
     >
-      {variant === "icon" && (
-        <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-          {liked ? "좋아요 목록에서 제거" : "좋아요 목록에 추가"}
-        </span>
-      )}
+      <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
+        {liked ? "좋아요 목록에서 제거" : "좋아요 목록에 추가"}
+      </span>
       <Heart
-        className="h-4 w-4"
+        className={iconSizeClass}
         strokeWidth={2}
         fill={liked ? "currentColor" : "none"}
       />
-      {variant === "default" ? "좋아요" : null}
     </button>
   );
 }
-
