@@ -1,5 +1,6 @@
 import type { UserRankingRow } from "@/features/rankings/types/user-ranking";
 import { CircleUser } from "lucide-react";
+import Link from "next/link";
 
 type UserRankingTableProps = {
   rows: UserRankingRow[];
@@ -42,26 +43,52 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
                     {row.rank}
                   </td>
                   <td className="px-6 py-3">
-                    <div className="flex items-center gap-3">
-                      {row.profileImageUrl ? (
-                        // Use <img> to avoid Next Image host restrictions.
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={row.profileImageUrl}
-                          alt=""
-                          className="h-8 w-8 rounded-full object-cover"
-                          referrerPolicy="no-referrer"
-                        />
-                      ) : (
-                        <CircleUser
-                          className="h-8 w-8 text-gray-400"
-                          aria-hidden="true"
-                        />
-                      )}
-                      <span className="font-medium text-gray-900">
-                        {row.nickname}
-                      </span>
-                    </div>
+                    {row.userId ? (
+                      <Link
+                        href={`/profiles/${row.userId}`}
+                        className="flex items-center gap-3 hover:underline"
+                      >
+                        {row.profileImageUrl ? (
+                          // Use <img> to avoid Next Image host restrictions.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={row.profileImageUrl}
+                            alt=""
+                            className="h-8 w-8 rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <CircleUser
+                            className="h-8 w-8 text-gray-400"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <span className="font-medium text-gray-900">
+                          {row.nickname}
+                        </span>
+                      </Link>
+                    ) : (
+                      <div className="flex items-center gap-3">
+                        {row.profileImageUrl ? (
+                          // Use <img> to avoid Next Image host restrictions.
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={row.profileImageUrl}
+                            alt=""
+                            className="h-8 w-8 rounded-full object-cover"
+                            referrerPolicy="no-referrer"
+                          />
+                        ) : (
+                          <CircleUser
+                            className="h-8 w-8 text-gray-400"
+                            aria-hidden="true"
+                          />
+                        )}
+                        <span className="font-medium text-gray-900">
+                          {row.nickname}
+                        </span>
+                      </div>
+                    )}
                   </td>
                   <td className="px-6 py-3">{nf.format(row.totalLikes)}</td>
                 </tr>

@@ -177,6 +177,61 @@ export const getPopularPromptsCached = unstable_cache(
   { revalidate: 600 },
 );
 
+type PromptCardRow = Pick<
+  PromptRow,
+  "id" | "user_id" | "nickname" | "title" | "ai_model" | "sample_image_url" | "created_at"
+>;
+
+export async function getPromptsByIdsPublic(ids: string[]): Promise<PromptCardRow[]> {
+  const unique = Array.from(new Set(ids)).filter((id) => UUID_REGEX.test(id));
+  if (unique.length === 0) return [];
+
+  const supabase = createPublicClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  const { data, error } = await supabase
+    .from("prompts")
+    .select("id, user_id, nickname, title, ai_model, sample_image_url, created_at")
+    .in("id", unique)
+    .order("created_at", { ascending: false })
+    .limit(Math.min(200, unique.length));
+
+  if (error) {
+    logServerError("getPromptsByIdsPublic", error);
+    return [];
+  }
+
+  return (data ?? []) as PromptCardRow[];
+}
+
+export async function getPromptsByUserPublic(
+  userId: string,
+  limit = 60,
+): Promise<PromptCardRow[]> {
+  if (!UUID_REGEX.test(userId)) return [];
+
+  const supabase = createPublicClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  const { data, error } = await supabase
+    .from("prompts")
+    .select("id, user_id, nickname, title, ai_model, sample_image_url, created_at")
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(Math.max(1, Math.min(200, limit)));
+
+  if (error) {
+    logServerError("getPromptsByUserPublic", error);
+    return [];
+  }
+
+  return (data ?? []) as PromptCardRow[];
+}
+
 export async function getPromptModels(): Promise<string[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("prompts").select("ai_model");

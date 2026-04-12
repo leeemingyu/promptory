@@ -144,7 +144,12 @@ export default async function PromptDetailPage({
 
           <div className="mt-8 flex items-center justify-between">
             <div className="flex flex-col gap-1 text-gray-500">
-              <span className="font-bold text-gray-600">{prompt.nickname}</span>
+              <Link
+                href={`/profiles/${prompt.user_id}`}
+                className="w-fit font-bold text-gray-600 hover:text-gray-800 hover:underline"
+              >
+                {prompt.nickname}
+              </Link>
               <LocalRelativeTime value={prompt.created_at} />
             </div>
             {canEdit ? (

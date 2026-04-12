@@ -65,6 +65,8 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/auth") ||
     pathname === "/rankings" ||
     pathname.startsWith("/rankings/") ||
+    pathname === "/profiles" ||
+    pathname.startsWith("/profiles/") ||
     pathname === "/prompts" ||
     pathname.startsWith("/prompts/");
 

@@ -11,7 +11,7 @@ export async function getProfileByUserId(
   const supabase = createClient();
   const { data, error } = await supabase
     .from("profiles")
-    .select("id, email, nickname")
+    .select("id, email, nickname, profile_image_url")
     .eq("id", userId)
     .maybeSingle();
 
@@ -41,6 +41,7 @@ export async function getCurrentUserProfile(): Promise<ProfileRow | null> {
       (data.user.user_metadata?.nickname as string | undefined) ||
       data.user.email?.split("@")[0] ||
       "user",
+    profile_image_url: null,
   };
 }
 
