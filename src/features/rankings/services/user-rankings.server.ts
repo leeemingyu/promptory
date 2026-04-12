@@ -22,7 +22,9 @@ async function getUserRankings(): Promise<UserRankingRow[]> {
 
   const { data, error } = await supabase
     .from("ranking_summary")
-    .select("rank, user_id, nickname, profile_image_url, total_likes, updated_at")
+    .select(
+      "rank, user_id, nickname, profile_image_url, total_likes, updated_at",
+    )
     .order("rank", { ascending: true })
     .limit(50);
 
@@ -46,5 +48,5 @@ async function getUserRankings(): Promise<UserRankingRow[]> {
 export const getUserRankingsCached = unstable_cache(
   async () => getUserRankings(),
   ["user-rankings", "v2"],
-  { revalidate: 300 },
+  { revalidate: 60 },
 );
