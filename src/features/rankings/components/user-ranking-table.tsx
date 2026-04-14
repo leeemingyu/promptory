@@ -1,5 +1,5 @@
 import type { UserRankingRow } from "@/features/rankings/types/user-ranking";
-import { CircleUser } from "lucide-react";
+import { CircleUser, User } from "lucide-react";
 import Link from "next/link";
 
 type UserRankingTableProps = {
@@ -15,7 +15,8 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
         <h2 className="text-lg font-bold text-gray-900">사용자 랭킹</h2>
         <p className="mt-1 text-sm text-gray-500">
           랭킹은 매시간 정각에 바뀌어요. 좋아요 수와 서비스 기여도를 종합해서
-          순위를 결정해요. 매시간 정각, 새롭게 업데이트되는 랭킹을 확인해 보세요.
+          순위를 결정해요. 매시간 정각, 새롭게 업데이트되는 랭킹을 확인해
+          보세요.
         </p>
       </div>
 
@@ -58,10 +59,14 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
                             referrerPolicy="no-referrer"
                           />
                         ) : (
-                          <CircleUser
-                            className="h-8 w-8 text-gray-400"
-                            aria-hidden="true"
-                          />
+                          <>
+                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200">
+                              <User
+                                className="h-6 w-6 text-gray-400"
+                                aria-hidden="true"
+                              />
+                            </div>
+                          </>
                         )}
                         <span className="font-medium text-gray-900">
                           {row.nickname}

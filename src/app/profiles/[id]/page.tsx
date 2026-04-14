@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CircleUser } from "lucide-react";
+import { Pencil, User } from "lucide-react";
 import { getPublicProfileByUserIdCached } from "@/features/profiles";
 import { PromptCard } from "@/features/prompts";
 import Link from "next/link";
@@ -53,9 +53,9 @@ export default async function ProfilePage({
       : [];
 
   return (
-    <main className="mx-auto max-w-3xl p-6">
-      <div className="rounded-2xl border border-gray-200 bg-white p-6">
-        <div className="flex items-center gap-4">
+    <main className="mx-auto max-w-3xl">
+      <div className="flex justify-between gap-4 flex-col sm:flex-row">
+        <div className="flex gap-4">
           {profile.profile_image_url ? (
             // Use <img> to avoid Next Image host restrictions.
             // eslint-disable-next-line @next/next/no-img-element
@@ -66,16 +66,16 @@ export default async function ProfilePage({
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
-              <CircleUser
-                className="h-10 w-10 text-gray-400"
+            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gray-200">
+              <User
+                className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400"
                 aria-hidden="true"
               />
             </div>
           )}
 
-          <div className="min-w-0">
-            <h1 className="truncate text-2xl font-bold text-gray-900">
+          <div className="min-w-0 flex flex-col justify-center">
+            <h1 className="truncate sm:text-2xl font-bold text-gray-900">
               {profile.nickname ?? "user"}
             </h1>
             {isMine ? (
@@ -85,23 +85,31 @@ export default async function ProfilePage({
             ) : null}
           </div>
         </div>
+
+        <div className="flex justify-center items-center gap-1 py-2 px-4 h-fit bg-gray-200 sm:bg-blue-100 rounded-xl text-gray-800 sm:text-blue-500 font-semibold cursor-pointer transition hover:bg-gray-300 sm:hover:bg-blue-200">
+          <Pencil
+            className="hidden sm:block h-5 w-5 text-blue-100 fill-blue-500"
+            strokeWidth={1.5}
+          />
+          프로필 편집
+        </div>
       </div>
       <section className="mt-10">
         {isMine ? (
           <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
-            <div className="flex items-center gap-2 rounded-full border border-gray-200 bg-white p-1 text-sm">
+            <div className="flex items-center gap-2 bg-white p-1 text-sm">
               <Link
                 href={`/profiles/${id}?tab=posts`}
                 scroll={false}
                 className={[
                   "rounded-full px-4 py-2 font-semibold transition",
                   activeTab === "posts"
-                    ? "bg-gray-900 text-white"
+                    ? "bg-gray-100 text-gray-700"
                     : "text-gray-700 hover:bg-gray-100",
                 ].join(" ")}
               >
                 작성한 글
-                <span className="ml-2 text-xs font-bold opacity-80">
+                <span className="ml-1 text-xs font-bold opacity-80">
                   {prompts.length}
                 </span>
               </Link>
@@ -111,12 +119,12 @@ export default async function ProfilePage({
                 className={[
                   "rounded-full px-4 py-2 font-semibold transition",
                   activeTab === "liked"
-                    ? "bg-gray-900 text-white"
+                    ? "bg-gray-100 text-gray-700"
                     : "text-gray-700 hover:bg-gray-100",
                 ].join(" ")}
               >
                 좋아요
-                <span className="ml-2 text-xs font-bold opacity-80">
+                <span className="ml-1 text-xs font-bold opacity-80">
                   {likedPromptIds.length}
                 </span>
               </Link>

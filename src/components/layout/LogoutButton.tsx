@@ -5,11 +5,18 @@ import { createClient } from "@/lib/supabase/client";
 
 type LogoutButtonProps = {
   onLogout?: () => void;
+  className?: string;
+  buttonProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
 };
 
-export default function LogoutButton({ onLogout }: LogoutButtonProps) {
+export default function LogoutButton({
+  onLogout,
+  className,
+  buttonProps,
+}: LogoutButtonProps) {
   const router = useRouter();
   const supabase = createClient();
+  const { className: buttonClassName, ...restButtonProps } = buttonProps ?? {};
 
   const handleLogout = async () => {
     try {
@@ -24,8 +31,16 @@ export default function LogoutButton({ onLogout }: LogoutButtonProps) {
 
   return (
     <button
+      type="button"
+      {...restButtonProps}
       onClick={handleLogout}
-      className="cursor-pointer text-sm text-gray-500 hover:text-red-500"
+      className={[
+        "cursor-pointer text-sm text-gray-500",
+        buttonClassName,
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       로그아웃
     </button>
