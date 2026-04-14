@@ -22,7 +22,7 @@ export const getProfileByUserId = cache(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("profiles")
-      .select("id, email, nickname, profile_image_url")
+      .select("id, email, nickname, profile_image_url, last_nickname_updated_at")
       .eq("id", userId)
       .maybeSingle();
 
@@ -57,6 +57,7 @@ export const getCurrentUserProfile = cache(
         data.user.email?.split("@")[0] ||
         "user",
       profile_image_url: null,
+      last_nickname_updated_at: null,
     };
   },
 );

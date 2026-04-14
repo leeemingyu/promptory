@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Pencil, User } from "lucide-react";
+import { User } from "lucide-react";
 import { getPublicProfileByUserIdCached } from "@/features/profiles";
 import { PromptCard } from "@/features/prompts";
 import Link from "next/link";
+import ProfileEditButton from "@/features/profiles/components/profile-edit-button";
+import { getCurrentUserProfile } from "@/features/profiles/services/profiles.server";
 import {
   getCurrentUserId,
   getLikedPromptIds,
@@ -26,11 +28,13 @@ export default async function ProfilePage({
   searchParams,
 }: ProfilePageProps) {
   const { id } = await params;
-  const profile = await getPublicProfileByUserIdCached(id);
-  if (!profile) notFound();
-
   const currentUserId = await getCurrentUserId();
   const isMine = Boolean(currentUserId && currentUserId === id);
+
+  const profile = isMine
+    ? await getCurrentUserProfile()
+    : await getPublicProfileByUserIdCached(id);
+  if (!profile) notFound();
 
   const resolvedSearchParams = (await searchParams) ?? {};
   const tabRaw = resolvedSearchParams.tab;
@@ -86,13 +90,13 @@ export default async function ProfilePage({
           </div>
         </div>
 
-        <div className="flex justify-center items-center gap-1 py-2 px-4 h-fit bg-gray-200 sm:bg-blue-100 rounded-xl text-gray-800 sm:text-blue-500 font-semibold cursor-pointer transition hover:bg-gray-300 sm:hover:bg-blue-200">
-          <Pencil
-            className="hidden sm:block h-5 w-5 text-blue-100 fill-blue-500"
-            strokeWidth={1.5}
+        {isMine ? (
+          <ProfileEditButton
+            profileId={id}
+            initialNickname={profile.nickname ?? "user"}
+            lastNicknameUpdatedAt={profile.last_nickname_updated_at ?? null}
           />
-          프로필 편집
-        </div>
+        ) : null}
       </div>
       <section className="mt-10">
         {isMine ? (

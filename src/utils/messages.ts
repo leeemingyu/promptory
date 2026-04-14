@@ -8,6 +8,8 @@ export const CREATE_FAILED_MESSAGE =
   "요청을 처리하지 못했어요. 다시 시도해주세요.";
 export const LOAD_FAILED_MESSAGE = "불러오기에 실패했어요.";
 export const UPDATE_FAILED_MESSAGE = "수정에 실패했어요. 다시 시도해주세요.";
+export const NICKNAME_COOLDOWN_MESSAGE =
+  "닉네임은 5분 뒤 다시 바꿀 수 있어요.";
 export const DELETE_FAILED_MESSAGE = "삭제에 실패했어요. 다시 시도해주세요.";
 export const LIKE_FAILED_MESSAGE =
   "좋아요 처리에 실패했어요. 다시 시도해주세요.";
