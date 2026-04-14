@@ -14,11 +14,14 @@ export default function Footer() {
           </div>
 
           <div className="grid gap-3 text-sm text-gray-600">
-            <Link href="/prompts" className="transition hover:text-black">
-              전체 프롬프트
+            <Link href="/" className="transition hover:text-black">
+              홈
             </Link>
-            <Link href="/login" className="transition hover:text-black">
-              로그인
+            <Link href="/prompts" className="transition hover:text-black">
+              프롬프트
+            </Link>
+            <Link href="/rankings" className="transition hover:text-black">
+              랭킹
             </Link>
           </div>
         </div>
