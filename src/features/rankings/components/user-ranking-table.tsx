@@ -1,6 +1,7 @@
 import type { UserRankingRow } from "@/features/rankings/types/user-ranking";
-import { CircleUser, User } from "lucide-react";
+import { CircleUser } from "lucide-react";
 import Link from "next/link";
+import ProfileAvatar from "@/components/profile-avatar";
 
 type UserRankingTableProps = {
   rows: UserRankingRow[];
@@ -49,39 +50,25 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
                         href={`/profiles/${row.userId}`}
                         className="flex items-center gap-3 hover:underline"
                       >
-                        {row.profileImageUrl ? (
-                          // Use <img> to avoid Next Image host restrictions.
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={row.profileImageUrl}
-                            alt=""
-                            className="h-8 w-8 rounded-full object-cover"
-                            referrerPolicy="no-referrer"
-                          />
-                        ) : (
-                          <>
-                            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200">
-                              <User
-                                className="h-6 w-6 text-gray-400"
-                                aria-hidden="true"
-                              />
-                            </div>
-                          </>
-                        )}
+                        <ProfileAvatar
+                          imageUrl={row.profileImageUrl}
+                          wrapperClassName="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200 p-0.5"
+                          fallbackVariant="box"
+                          fallbackClassName="flex h-8 w-8 items-center justify-center rounded-lg bg-gray-200"
+                          imgClassName="h-full w-full rounded-full object-cover"
+                          iconClassName="h-6 w-6 text-gray-400"
+                        />
                         <span className="font-medium text-gray-900">
                           {row.nickname}
                         </span>
                       </Link>
                     ) : (
                       <div className="flex items-center gap-3">
-                        {row.profileImageUrl ? (
-                          // Use <img> to avoid Next Image host restrictions.
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={row.profileImageUrl}
-                            alt=""
-                            className="h-8 w-8 rounded-full object-cover"
-                            referrerPolicy="no-referrer"
+                        {row.profileImageUrl && row.profileImageUrl !== "default" ? (
+                          <ProfileAvatar
+                            imageUrl={row.profileImageUrl}
+                            imgClassName="h-8 w-8 rounded-full object-cover"
+                            iconClassName="h-6 w-6 text-gray-400"
                           />
                         ) : (
                           <CircleUser

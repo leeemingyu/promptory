@@ -65,7 +65,7 @@ export async function getCurrentUserProfile(): Promise<ProfileRow | null> {
       (data.user.user_metadata?.nickname as string | undefined) ||
       data.user.email?.split("@")[0] ||
       "user",
-    profile_image_url: null,
+    profile_image_url: "default",
     last_nickname_updated_at: null,
   };
 }
@@ -78,48 +78,80 @@ export async function getCurrentUserNickname(): Promise<string | null> {
 }
 
 export async function updateMyNickname(nextNickname: string): Promise<void> {
-  const nickname = nextNickname.trim();
-  if (!nickname) {
+  await updateMyProfile({ nickname: nextNickname });
+}
+
+export async function updateMyProfile(input: {
+  nickname?: string;
+  profileImageUrl?: string | null;
+}): Promise<void> {
+  const nickname = typeof input.nickname === "string" ? input.nickname.trim() : undefined;
+  const profileImageUrlRaw =
+    typeof input.profileImageUrl === "string" ? input.profileImageUrl : input.profileImageUrl === null ? "default" : undefined;
+
+  if (nickname !== undefined && !nickname) {
     throw new Error(UPDATE_FAILED_MESSAGE);
   }
 
   const supabase = createClient();
   const { data, error: userError } = await supabase.auth.getUser();
   if (userError || !data.user) {
-    if (userError) logClientError("updateMyNickname/getUser", userError);
+    if (userError) logClientError("updateMyProfile/getUser", userError);
     throw new Error(LOGIN_REQUIRED_MESSAGE);
   }
 
   const { data: current, error: profileError } = await supabase
     .from("profiles")
-    .select("last_nickname_updated_at")
+    .select("nickname, profile_image_url, last_nickname_updated_at")
     .eq("id", data.user.id)
     .maybeSingle();
 
   if (profileError) {
-    logClientError("updateMyNickname/loadProfile", profileError);
+    logClientError("updateMyProfile/loadProfile", profileError);
     throw new Error(UPDATE_FAILED_MESSAGE);
   }
 
-  const last = current?.last_nickname_updated_at as string | null | undefined;
-  if (typeof last === "string" && last) {
-    const lastMs = new Date(last).getTime();
-    if (Number.isFinite(lastMs)) {
-      const elapsedMs = Date.now() - lastMs;
-      if (elapsedMs < NICKNAME_COOLDOWN_MS) {
-        const remainingMs = Math.max(0, NICKNAME_COOLDOWN_MS - elapsedMs);
-        throw new Error(formatNicknameCooldown(remainingMs));
+  const updates: Record<string, unknown> = {};
+
+  const currentNickname =
+    typeof current?.nickname === "string" ? (current.nickname as string) : null;
+  const currentProfileImageUrl =
+    typeof current?.profile_image_url === "string"
+      ? (current.profile_image_url as string)
+      : null;
+
+  if (nickname !== undefined && nickname !== (currentNickname ?? "")) {
+    const last = current?.last_nickname_updated_at as string | null | undefined;
+    if (typeof last === "string" && last) {
+      const lastMs = new Date(last).getTime();
+      if (Number.isFinite(lastMs)) {
+        const elapsedMs = Date.now() - lastMs;
+        if (elapsedMs < NICKNAME_COOLDOWN_MS) {
+          const remainingMs = Math.max(0, NICKNAME_COOLDOWN_MS - elapsedMs);
+          throw new Error(formatNicknameCooldown(remainingMs));
+        }
       }
     }
+
+    updates.nickname = nickname;
   }
+
+  if (
+    profileImageUrlRaw !== undefined &&
+    profileImageUrlRaw !== (currentProfileImageUrl ?? "default")
+  ) {
+    updates.profile_image_url = profileImageUrlRaw;
+  }
+
+  if (Object.keys(updates).length === 0) return;
 
   const { error } = await supabase
     .from("profiles")
-    .update({ nickname })
+    .update(updates)
     .eq("id", data.user.id);
 
   if (error) {
-    logClientError("updateMyNickname/update", error);
+    logClientError("updateMyProfile/update", error);
     throw new Error(UPDATE_FAILED_MESSAGE);
   }
 }

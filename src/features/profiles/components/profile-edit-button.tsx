@@ -6,13 +6,15 @@ import { useRouter } from "next/navigation";
 import { Pencil, X } from "lucide-react";
 import {
   isNicknameTaken,
-  updateMyNickname,
+  updateMyProfile,
 } from "@/features/profiles/services/profiles.client";
 import { UPDATE_FAILED_MESSAGE } from "@/utils/messages";
+import ProfileAvatar from "@/components/profile-avatar";
 
 type ProfileEditButtonProps = {
   profileId: string;
   initialNickname: string;
+  initialProfileImageUrl: string;
   lastNicknameUpdatedAt: string | null | undefined;
 };
 
@@ -44,6 +46,7 @@ function getCooldownLabel(remainingMs: number) {
 export default function ProfileEditButton({
   profileId,
   initialNickname,
+  initialProfileImageUrl,
   lastNicknameUpdatedAt,
 }: ProfileEditButtonProps) {
   const router = useRouter();
@@ -52,6 +55,9 @@ export default function ProfileEditButton({
 
   const [open, setOpen] = useState(false);
   const [nickname, setNickname] = useState(initialNickname);
+  const [profileImageUrl, setProfileImageUrl] = useState(
+    initialProfileImageUrl,
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [checkState, setCheckState] = useState<
@@ -62,14 +68,17 @@ export default function ProfileEditButton({
   const isTooLong = getCharCount(nickname) > NICKNAME_MAX_CHARS;
   const isTaken = checkState === "taken";
   const isInvalid = isTooLong || isTaken;
-  const isUnchanged = nickname.trim() === initialNickname.trim();
+  const nicknameChanged = nickname.trim() !== initialNickname.trim();
+  const imageChanged = profileImageUrl !== initialProfileImageUrl;
+  const isUnchanged = !nicknameChanged && !imageChanged;
 
   useEffect(() => {
     if (!open) return;
     setNickname(initialNickname);
+    setProfileImageUrl(initialProfileImageUrl);
     setError(null);
     setCheckState("idle");
-  }, [open, initialNickname]);
+  }, [open, initialNickname, initialProfileImageUrl]);
 
   useEffect(() => {
     if (!open) return;
@@ -217,23 +226,23 @@ export default function ProfileEditButton({
       setError("닉네임을 입력해주세요.");
       return;
     }
-    if (getCharCount(next) > NICKNAME_MAX_CHARS) {
+    if (nicknameChanged && getCharCount(next) > NICKNAME_MAX_CHARS) {
       setError("닉네임은 최대 12자까지만 가능해요.");
       return;
     }
-    if (!isUnchanged && cooldownMessage) {
+    if (nicknameChanged && cooldownMessage) {
       setError(cooldownMessage);
       return;
     }
-    if (checkState === "checking") {
+    if (nicknameChanged && checkState === "checking") {
       setError("닉네임 중복 확인 중이에요. 잠시만 기다려주세요.");
       return;
     }
-    if (checkState === "taken") {
+    if (nicknameChanged && checkState === "taken") {
       setError("이미 사용 중인 닉네임이에요.");
       return;
     }
-    if (next === initialNickname.trim()) {
+    if (isUnchanged) {
       setOpen(false);
       return;
     }
@@ -241,7 +250,10 @@ export default function ProfileEditButton({
     setIsSaving(true);
     try {
       const y = window.scrollY;
-      await updateMyNickname(next);
+      await updateMyProfile({
+        nickname: nicknameChanged ? next : undefined,
+        profileImageUrl: imageChanged ? profileImageUrl : undefined,
+      });
       setOpen(false);
       router.refresh();
       requestAnimationFrame(() => window.scrollTo({ top: y }));
@@ -296,7 +308,83 @@ export default function ProfileEditButton({
             </div>
 
             <div className="px-5 py-5">
-              <label className="block font-semibold text-gray-800">
+              <div>
+                <div className="block font-semibold text-gray-800">
+                  프로필 이미지
+                </div>
+                <div className="mt-3 grid grid-cols-3 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setProfileImageUrl("default")}
+                    className={[
+                      "flex flex-col items-center justify-center gap-2 rounded-2xl border p-3 ",
+                      profileImageUrl === "default"
+                        ? "ring-2 ring-blue-500 border-0"
+                        : "border-gray-200 ",
+                    ].join(" ")}
+                  >
+                    <ProfileAvatar
+                      imageUrl="default"
+                      fallbackVariant="box"
+                      fallbackClassName="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-200"
+                      wrapperClassName="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-200 p-1"
+                      imgClassName="h-full w-full rounded-full object-cover"
+                      iconClassName="h-7 w-7 text-gray-400"
+                    />
+                    <span className="text-xs font-semibold text-gray-700">
+                      기본
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProfileImageUrl("/images/profiles/cat.webp")
+                    }
+                    className={[
+                      "flex flex-col items-center justify-center gap-2 rounded-2xl border p-3 ",
+                      profileImageUrl === "/images/profiles/cat.webp"
+                        ? "ring-2 ring-blue-500 border-0"
+                        : "border-gray-200 ",
+                    ].join(" ")}
+                  >
+                    <ProfileAvatar
+                      imageUrl="/images/profiles/cat.webp"
+                      wrapperClassName="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-200 p-1"
+                      imgClassName="h-full w-full rounded-full object-cover"
+                      iconClassName="h-7 w-7 text-gray-400"
+                    />
+                    <span className="text-xs font-semibold text-gray-700">
+                      고양이
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setProfileImageUrl("/images/profiles/dog.webp")
+                    }
+                    className={[
+                      "flex flex-col items-center justify-center gap-2 rounded-2xl border p-3 ",
+                      profileImageUrl === "/images/profiles/dog.webp"
+                        ? "ring-2 ring-blue-500 border-0"
+                        : "border-gray-200 ",
+                    ].join(" ")}
+                  >
+                    <ProfileAvatar
+                      imageUrl="/images/profiles/dog.webp"
+                      wrapperClassName="flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-200 p-1"
+                      imgClassName="h-full w-full rounded-full object-cover"
+                      iconClassName="h-7 w-7 text-gray-400"
+                    />
+                    <span className="text-xs font-semibold text-gray-700">
+                      강아지
+                    </span>
+                  </button>
+                </div>
+              </div>
+
+              <label className="mt-6 block font-semibold text-gray-800">
                 닉네임
               </label>
               <input
@@ -316,33 +404,31 @@ export default function ProfileEditButton({
                 placeholder="닉네임을 입력해주세요"
               />
 
-              {!nickname.trim() ? (
-                <p className="mt-1 text-sm text-gray-500">
-                  닉네임을 입력해주세요.
-                </p>
-              ) : isTooLong ? (
-                <p className="mt-1 text-sm text-red-500">
-                  닉네임은 최대 12자까지만 가능해요.
-                </p>
-              ) : cooldownMessage ? (
-                <p className="mt-1 text-sm text-gray-500">{cooldownMessage}</p>
-              ) : error ? (
-                <p className="mt-1 text-sm text-red-500">{error}</p>
-              ) : checkState === "checking" ? (
-                <p className="mt-1 text-sm text-gray-500">중복 확인 중...</p>
-              ) : checkState === "taken" ? (
-                <p className="mt-1 text-sm text-red-500">
-                  이미 사용 중인 닉네임이에요.
-                </p>
-              ) : checkState === "available" ? (
-                <p className="mt-1 text-sm text-blue-500">
-                  사용 가능한 닉네임이에요.
-                </p>
-              ) : checkState === "error" ? (
-                <p className="mt-1 text-sm text-gray-500">
-                  중복 확인에 실패했어요. 저장으로 확인해볼 수 있어요.
-                </p>
-              ) : null}
+              <div className="mt-1 space-y-1 text-sm">
+                {!nickname.trim() ? (
+                  <p className="text-gray-500">닉네임을 입력해주세요.</p>
+                ) : isTooLong ? (
+                  <p className="text-red-500">
+                    닉네임은 최대 12자까지만 가능해요.
+                  </p>
+                ) : error ? (
+                  <p className="text-red-500">{error}</p>
+                ) : nicknameChanged && checkState === "checking" ? (
+                  <p className="text-gray-500">중복 확인 중...</p>
+                ) : nicknameChanged && checkState === "taken" ? (
+                  <p className="text-red-500">이미 사용 중인 닉네임이에요.</p>
+                ) : nicknameChanged && checkState === "available" ? (
+                  <p className="text-blue-500">사용 가능한 닉네임이에요.</p>
+                ) : nicknameChanged && checkState === "error" ? (
+                  <p className="text-gray-500">
+                    중복 확인에 실패했어요. 저장으로 확인해볼 수 있어요.
+                  </p>
+                ) : null}
+
+                {cooldownMessage ? (
+                  <p className="text-gray-500">{cooldownMessage}</p>
+                ) : null}
+              </div>
             </div>
 
             <div className="flex items-center justify-end gap-2 px-5 py-4">
@@ -360,10 +446,11 @@ export default function ProfileEditButton({
                 className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
                 disabled={
                   isSaving ||
-                  checkState === "checking" ||
-                  checkState === "taken" ||
-                  getCharCount(nickname) > NICKNAME_MAX_CHARS ||
-                  (!isUnchanged && Boolean(cooldownMessage))
+                  (nicknameChanged && checkState === "checking") ||
+                  (nicknameChanged && checkState === "taken") ||
+                  (nicknameChanged &&
+                    getCharCount(nickname) > NICKNAME_MAX_CHARS) ||
+                  (nicknameChanged && Boolean(cooldownMessage))
                 }
               >
                 {isSaving ? "저장 중..." : "저장하기"}

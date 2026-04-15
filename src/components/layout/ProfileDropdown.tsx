@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronRight, User } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import LogoutButton from "@/components/layout/LogoutButton";
+import ProfileAvatar from "@/components/profile-avatar";
 
 type ProfileDropdownProps = {
   profileId: string;
@@ -52,20 +53,13 @@ export default function ProfileDropdown({
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((prev) => !prev)}
-        className="inline-flex items-center gap-2 rounded-lg bg-gray-200 p-1 text-sm font-semibold text-gray-700 transition hover:bg-gray-300 cursor-pointer"
+        className="inline-flex items-center rounded-lg bg-gray-200 p-1 text-sm font-semibold text-gray-700 transition hover:bg-gray-300 cursor-pointer"
       >
-        {profileImageUrl ? (
-          // Use <img> to avoid Next Image host restrictions.
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={profileImageUrl}
-            alt=""
-            className="h-6 w-6 rounded-full object-cover"
-            referrerPolicy="no-referrer"
-          />
-        ) : (
-          <User className="h-6 w-6 text-gray-400" aria-hidden="true" />
-        )}
+        <ProfileAvatar
+          imageUrl={profileImageUrl}
+          imgClassName="h-6 w-6 rounded-full object-cover"
+          iconClassName="h-6 w-6 text-gray-400"
+        />
       </button>
 
       {open && (
@@ -75,19 +69,14 @@ export default function ProfileDropdown({
           className="absolute right-0 top-9 z-200 py-2 w-80 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-lg"
         >
           <header className="flex items-center gap-3 mt-1 px-5 py-2">
-            {profileImageUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={profileImageUrl}
-                alt=""
-                className="h-10 w-10 rounded-full object-cover"
-                referrerPolicy="no-referrer"
-              />
-            ) : (
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-200">
-                <User className="h-7 w-7 text-gray-400" aria-hidden="true" />
-              </div>
-            )}
+            <ProfileAvatar
+              imageUrl={profileImageUrl}
+              wrapperClassName="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-200 p-1"
+              fallbackVariant="box"
+              fallbackClassName="flex h-10 w-10 items-center justify-center rounded-xl bg-gray-200"
+              imgClassName="h-full w-full rounded-full object-cover"
+              iconClassName="h-7 w-7 text-gray-400"
+            />
             <div className="min-w-0">
               <div className="truncate font-bold text-gray-900">{nickname}</div>
             </div>

@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { User } from "lucide-react";
 import { getPublicProfileByUserIdCached } from "@/features/profiles";
 import { PromptCard } from "@/features/prompts";
 import Link from "next/link";
 import ProfileEditButton from "@/features/profiles/components/profile-edit-button";
 import { getCurrentUserProfile } from "@/features/profiles/services/profiles.server";
+import ProfileAvatar from "@/components/profile-avatar";
 import {
   getCurrentUserId,
   getLikedPromptIds,
@@ -57,26 +57,17 @@ export default async function ProfilePage({
       : [];
 
   return (
-    <main className="mx-auto max-w-3xl">
+    <main className="mx-auto max-w-3xl mt-3 sm:mt-7">
       <div className="flex justify-between gap-4 flex-col sm:flex-row">
         <div className="flex gap-4">
-          {profile.profile_image_url ? (
-            // Use <img> to avoid Next Image host restrictions.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={profile.profile_image_url}
-              alt=""
-              className="h-16 w-16 rounded-full object-cover"
-              referrerPolicy="no-referrer"
-            />
-          ) : (
-            <div className="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gray-200">
-              <User
-                className="h-8 w-8 sm:h-12 sm:w-12 text-gray-400"
-                aria-hidden="true"
-              />
-            </div>
-          )}
+          <ProfileAvatar
+            imageUrl={profile.profile_image_url ?? null}
+            wrapperClassName="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gray-200 p-1"
+            fallbackVariant="box"
+            fallbackClassName="flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-2xl bg-gray-200"
+            imgClassName="h-full w-full rounded-full object-cover"
+            iconClassName="h-8 w-8 sm:h-12 sm:w-12 text-gray-400"
+          />
 
           <div className="min-w-0 flex flex-col justify-center">
             <h1 className="truncate sm:text-2xl font-bold text-gray-900">
@@ -94,6 +85,7 @@ export default async function ProfilePage({
           <ProfileEditButton
             profileId={id}
             initialNickname={profile.nickname ?? "user"}
+            initialProfileImageUrl={profile.profile_image_url ?? "default"}
             lastNicknameUpdatedAt={profile.last_nickname_updated_at ?? null}
           />
         ) : null}
