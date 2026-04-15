@@ -232,6 +232,44 @@ export async function getPromptsByUserPublic(
   return (data ?? []) as PromptCardRow[];
 }
 
+export async function getPromptsCountByUserPublic(userId: string): Promise<number> {
+  if (!UUID_REGEX.test(userId)) return 0;
+
+  const supabase = createPublicClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  );
+
+  const { count, error } = await supabase
+    .from("prompts")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) {
+    logServerError("getPromptsCountByUserPublic", error);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
+export async function getLikedPromptsCount(userId: string): Promise<number> {
+  if (!UUID_REGEX.test(userId)) return 0;
+
+  const supabase = await createClient();
+  const { count, error } = await supabase
+    .from("prompt_likes")
+    .select("id", { count: "exact", head: true })
+    .eq("user_id", userId);
+
+  if (error) {
+    logServerError("getLikedPromptsCount", error);
+    return 0;
+  }
+
+  return count ?? 0;
+}
+
 export async function getPromptModels(): Promise<string[]> {
   const supabase = await createClient();
   const { data, error } = await supabase.from("prompts").select("ai_model");

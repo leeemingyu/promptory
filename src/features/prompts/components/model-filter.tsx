@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+import { usePromptsNavigationSkeleton } from "@/features/prompts/hooks/use-prompts-navigation-skeleton";
 
 type ModelFilterProps = {
   options: readonly string[];
@@ -18,6 +20,8 @@ export default function ModelFilter({
   perfTest = false,
 }: ModelFilterProps) {
   const router = useRouter();
+  const [, startTransition] = useTransition();
+  const startSkeleton = usePromptsNavigationSkeleton((s) => s.start);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const nextModel = event.target.value;
@@ -27,7 +31,10 @@ export default function ModelFilter({
     if (query) params.set("q", query);
     if (nextModel) params.set("model", nextModel);
     const qs = params.toString();
-    router.push(qs ? `/prompts?${qs}` : "/prompts");
+    startSkeleton();
+    startTransition(() => {
+      router.push(qs ? `/prompts?${qs}` : "/prompts");
+    });
   };
 
   return (

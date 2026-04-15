@@ -1,6 +1,8 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { memo, useTransition } from "react";
+import { usePromptsNavigationSkeleton } from "@/features/prompts/hooks/use-prompts-navigation-skeleton";
 
 type SortSelectProps = {
   value: string;
@@ -9,13 +11,15 @@ type SortSelectProps = {
   perfTest?: boolean;
 };
 
-export default function SortSelect({
+function SortSelect({
   value,
   query,
   model,
   perfTest = false,
 }: SortSelectProps) {
   const router = useRouter();
+  const [, startTransition] = useTransition();
+  const startSkeleton = usePromptsNavigationSkeleton((s) => s.start);
 
   const handleChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     const nextSort = event.target.value;
@@ -25,7 +29,10 @@ export default function SortSelect({
     if (query) params.set("q", query);
     if (model) params.set("model", model);
     const qs = params.toString();
-    router.push(qs ? `/prompts?${qs}` : "/prompts");
+    startSkeleton();
+    startTransition(() => {
+      router.push(qs ? `/prompts?${qs}` : "/prompts");
+    });
   };
 
   return (
@@ -40,3 +47,5 @@ export default function SortSelect({
     </select>
   );
 }
+
+export default memo(SortSelect);

@@ -4,6 +4,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import PromptCard from "./prompt-card";
 import SortSelect from "./sort-select";
 import type { PromptSort } from "../types";
+import PromptCardGridSkeleton from "@/features/prompts/components/prompt-card-grid-skeleton";
+import { usePromptsNavigationSkeleton } from "@/features/prompts/hooks/use-prompts-navigation-skeleton";
 
 type PromptListItem = {
   id: string;
@@ -38,6 +40,9 @@ export default function DbPromptsInfinite({
   const [hasMore, setHasMore] = useState(initialPrompts.length === pageSize);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
 
+  const isNavigating = usePromptsNavigationSkeleton((s) => s.isNavigating);
+  const stopSkeleton = usePromptsNavigationSkeleton((s) => s.stop);
+
   const likedSet = useMemo(() => new Set(likedIds), [likedIds]);
   const buildDetailHref = (id: string) => {
     const params = new URLSearchParams();
@@ -52,7 +57,8 @@ export default function DbPromptsInfinite({
     setItems(initialPrompts);
     setPage(1);
     setHasMore(initialPrompts.length === pageSize);
-  }, [initialPrompts, pageSize, query, model, sort]);
+    stopSkeleton();
+  }, [initialPrompts, model, pageSize, query, sort, stopSkeleton]);
 
   const loadMore = useCallback(async () => {
     if (isLoading || !hasMore) return;
@@ -78,6 +84,7 @@ export default function DbPromptsInfinite({
   }, [hasMore, isLoading, model, page, pageSize, query, sort]);
 
   useEffect(() => {
+    if (isNavigating) return;
     if (!hasMore) return;
     const target = sentinelRef.current;
     if (!target) return;
@@ -93,7 +100,7 @@ export default function DbPromptsInfinite({
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [hasMore, loadMore]);
+  }, [hasMore, isNavigating, loadMore]);
 
   return (
     <>
@@ -110,18 +117,27 @@ export default function DbPromptsInfinite({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
-            {items.map((prompt) => (
-              <PromptCard
-                key={prompt.id}
-                prompt={prompt}
-                href={buildDetailHref(prompt.id)}
-                showLike={showLike}
-                liked={likedSet.has(prompt.id)}
-              />
-            ))}
-          </div>
-          {hasMore && <div ref={sentinelRef} className="h-10" />}
+          {isNavigating ? (
+            <PromptCardGridSkeleton
+              showAuthor
+              gridClassName="grid grid-cols-2 gap-6 lg:grid-cols-3"
+            />
+          ) : (
+            <>
+              <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+                {items.map((prompt) => (
+                  <PromptCard
+                    key={prompt.id}
+                    prompt={prompt}
+                    href={buildDetailHref(prompt.id)}
+                    showLike={showLike}
+                    liked={likedSet.has(prompt.id)}
+                  />
+                ))}
+              </div>
+              {hasMore && <div ref={sentinelRef} className="h-10" />}
+            </>
+          )}
         </>
       )}
     </>
