@@ -48,6 +48,7 @@ export default async function HomePage() {
               href={`/prompts/${prompt.id}`}
               showLike={true}
               liked={likedSet.has(prompt.id)}
+              showAuthor={false}
             />
           ))}
         </div>
@@ -55,4 +56,3 @@ export default async function HomePage() {
     </main>
   );
 }
-

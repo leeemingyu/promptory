@@ -17,10 +17,28 @@ type ProfileEditButtonProps = {
 };
 
 const NICKNAME_MAX_CHARS = 12;
-const NICKNAME_COOLDOWN_MS = 3 * 60 * 1000;
+const NICKNAME_COOLDOWN_MS = 60 * 24 * 60 * 60 * 1000; // 60 days
+const MINUTE_MS = 60_000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_MS = 24 * HOUR_MS;
 
 function getCharCount(value: string) {
   return Array.from(value).length;
+}
+
+function getCooldownLabel(remainingMs: number) {
+  if (remainingMs > DAY_MS) {
+    const days = Math.max(1, Math.ceil(remainingMs / DAY_MS));
+    return { label: `${days}일`, shouldTick: false };
+  }
+
+  if (remainingMs > HOUR_MS) {
+    const hours = Math.max(1, Math.ceil(remainingMs / HOUR_MS));
+    return { label: `${hours}시간`, shouldTick: true };
+  }
+
+  const minutes = Math.max(1, Math.ceil(remainingMs / MINUTE_MS));
+  return { label: `${minutes}분`, shouldTick: true };
 }
 
 export default function ProfileEditButton({
@@ -39,22 +57,12 @@ export default function ProfileEditButton({
   const [checkState, setCheckState] = useState<
     "idle" | "checking" | "available" | "taken" | "error"
   >("idle");
+  const [cooldownMessage, setCooldownMessage] = useState<string | null>(null);
 
   const isTooLong = getCharCount(nickname) > NICKNAME_MAX_CHARS;
   const isTaken = checkState === "taken";
   const isInvalid = isTooLong || isTaken;
   const isUnchanged = nickname.trim() === initialNickname.trim();
-  const cooldownMessage = (() => {
-    if (!lastNicknameUpdatedAt) return null;
-    const ms = new Date(lastNicknameUpdatedAt).getTime();
-    if (!Number.isFinite(ms)) return null;
-
-    const remainingMs = NICKNAME_COOLDOWN_MS - (Date.now() - ms);
-    if (remainingMs <= 0) return null;
-
-    const remainingMinutes = Math.max(1, Math.ceil(remainingMs / 60_000));
-    return `닉네임은 ${remainingMinutes}분 뒤 다시 바꿀 수 있어요.`;
-  })();
 
   useEffect(() => {
     if (!open) return;
@@ -62,6 +70,41 @@ export default function ProfileEditButton({
     setError(null);
     setCheckState("idle");
   }, [open, initialNickname]);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const lastMs = lastNicknameUpdatedAt
+      ? new Date(lastNicknameUpdatedAt).getTime()
+      : Number.NaN;
+
+    if (!Number.isFinite(lastMs)) {
+      setCooldownMessage(null);
+      return;
+    }
+
+    const compute = () => {
+      const remainingMs = NICKNAME_COOLDOWN_MS - (Date.now() - lastMs);
+      if (remainingMs <= 0) {
+        setCooldownMessage(null);
+        return { shouldTick: false, active: false };
+      }
+
+      const { label, shouldTick } = getCooldownLabel(remainingMs);
+      setCooldownMessage(`닉네임은 ${label} 뒤에 바꿀 수 있어요.`);
+      return { shouldTick, active: true };
+    };
+
+    const first = compute();
+    if (!first.active || !first.shouldTick) return;
+
+    const id = window.setInterval(() => {
+      const next = compute();
+      if (!next.active) window.clearInterval(id);
+    }, MINUTE_MS);
+
+    return () => window.clearInterval(id);
+  }, [open, lastNicknameUpdatedAt]);
 
   useEffect(() => {
     if (!open) return;
@@ -315,14 +358,13 @@ export default function ProfileEditButton({
                 type="button"
                 onClick={handleSubmit}
                 className="rounded-xl bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-                // disabled={
-                //   isSaving ||
-                //   checkState === "checking" ||
-                //   checkState === "taken" ||
-                //   getCharCount(nickname) > NICKNAME_MAX_CHARS ||
-                //   (!isUnchanged && Boolean(cooldownMessage)) ||
-                //   isUnchanged
-                // }
+                disabled={
+                  isSaving ||
+                  checkState === "checking" ||
+                  checkState === "taken" ||
+                  getCharCount(nickname) > NICKNAME_MAX_CHARS ||
+                  (!isUnchanged && Boolean(cooldownMessage))
+                }
               >
                 {isSaving ? "저장 중..." : "저장하기"}
               </button>
