@@ -46,13 +46,21 @@ export async function generateMetadata({
 
   return {
     title: `${prompt.title} | Promptory`,
+    description:
+      prompt.description ||
+      `${prompt.nickname}님의 AI 프롬프트 변환 결과를 확인해보세요.`,
     openGraph: {
       title: `${prompt.title} | Promptory`,
+      description:
+        prompt.description || "상상하는 모든 스타일을 현실로, Promptory",
       url: `/prompts/${prompt.id}`,
       images: [prompt.sample_image_url || "/og.png"],
+      type: "article",
     },
     twitter: {
       title: `${prompt.title} | Promptory`,
+      description:
+        prompt.description || "상상하는 모든 스타일을 현실로, Promptory",
       images: [prompt.sample_image_url || "/og.png"],
     },
   };
