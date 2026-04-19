@@ -108,46 +108,39 @@ export async function updatePrompt(
     userId?: string;
   },
 ) {
-  const supabase = createClient();
-  const userId = options?.userId ?? (await requireCurrentUser()).id;
+  const res = await fetch(`/api/prompts/${promptId}`, {
+    method: "PATCH",
+    headers: {
+      "content-type": "application/json",
+    },
+    body: JSON.stringify({
+      title: input.title,
+      prompt_text: input.prompt_text,
+      description: input.description,
+      ai_model: input.ai_model,
+      beforeImageKey: options?.beforeImageUrl ?? null,
+      afterImageKey: options?.afterImageUrl ?? null,
+    }),
+  });
 
-  const payload: Record<string, unknown> = {
-    title: input.title,
-    prompt_text: input.prompt_text,
-    description: input.description || null,
-    ai_model: input.ai_model,
-  };
-  if (options && "beforeImageUrl" in options) {
-    payload.before_image_url = options.beforeImageUrl ?? null;
-  }
-  if (options && "afterImageUrl" in options) {
-    payload.sample_image_url = options.afterImageUrl ?? null;
-  }
-
-  const { error } = await supabase
-    .from("prompts")
-    .update(payload)
-    .eq("id", promptId)
-    .eq("user_id", userId);
-
-  if (error) {
-    logClientError("updatePrompt", error);
+  if (!res.ok) {
+    const error = await res.text().catch(() => "");
+    logClientError("updatePrompt", error || res.statusText);
     throw new Error(UPDATE_FAILED_MESSAGE);
   }
 }
 
 export async function deletePrompt(promptId: string, userId?: string) {
-  const supabase = createClient();
-  const resolvedUserId = userId ?? (await requireCurrentUser()).id;
+  // userId는 이전 호출부 호환을 위해 남겨둡니다.
+  void userId;
 
-  const { error } = await supabase
-    .from("prompts")
-    .delete()
-    .eq("id", promptId)
-    .eq("user_id", resolvedUserId);
+  const res = await fetch(`/api/prompts/${promptId}`, {
+    method: "DELETE",
+  });
 
-  if (error) {
-    logClientError("deletePrompt", error);
+  if (!res.ok) {
+    const error = await res.text().catch(() => "");
+    logClientError("deletePrompt", error || res.statusText);
     throw new Error(DELETE_FAILED_MESSAGE);
   }
 }

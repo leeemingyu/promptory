@@ -245,7 +245,10 @@ export default function EditPromptPage() {
     if (!afterImageFile && !originalAfterUrl) {
       setShowAfterError(true);
     }
-    if ((!beforeImageFile && !originalBeforeUrl) || (!afterImageFile && !originalAfterUrl)) {
+    if (
+      (!beforeImageFile && !originalBeforeUrl) ||
+      (!afterImageFile && !originalAfterUrl)
+    ) {
       const targetId =
         !beforeImageFile && !originalBeforeUrl
           ? "before-image-input"
@@ -360,7 +363,8 @@ export default function EditPromptPage() {
         </div>
 
         <p className="text-sm text-gray-500">
-          업로드한 이미지는 <span className="font-semibold">3:4 비율로 자동 크롭</span>
+          업로드한 이미지는{" "}
+          <span className="font-semibold">3:4 비율로 자동 크롭</span>
           되어 저장돼요. 아래 미리보기 그대로 저장됩니다.
         </p>
 

@@ -1,41 +1,29 @@
-import { createClient } from "@/lib/supabase/client";
+"use client";
 
-const supabase = createClient();
+/**
+ * Uploads an image via our server route (service role) and returns the DB key (e.g. `uuid.webp`).
+ * This avoids Supabase Storage RLS issues on the browser.
+ */
+export async function uploadImage(file: File): Promise<string> {
+  const form = new FormData();
+  form.append("file", file);
 
-export const uploadImage = async (file: File) => {
-  const rawExt = file.name.split(".").pop()?.toLowerCase();
-  const ext =
-    rawExt ||
-    (file.type === "image/png"
-      ? "png"
-      : file.type === "image/jpeg"
-        ? "jpg"
-        : file.type === "image/webp"
-          ? "webp"
-          : "");
+  const res = await fetch("/api/uploads/prompt-image", {
+    method: "POST",
+    body: form,
+  });
 
-  if (!ext) {
-    throw new Error("유효한 이미지 파일 확장자를 확인할 수 없어요.");
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.error("[uploadImage] failed", res.status, text);
+    throw new Error("이미지 업로드에 실패했어요.");
   }
 
-  // crop 단계에서 이미 uuid.webp 같은 파일명으로 만들어주기 때문에 기본은 그걸 유지합니다.
-  const fileName =
-    file.name && file.name.includes(".")
-      ? file.name
-      : `${crypto.randomUUID()}.${ext}`;
+  const data = (await res.json().catch(() => null)) as { key?: string } | null;
+  if (!data?.key) {
+    throw new Error("이미지 업로드 응답이 올바르지 않아요.");
+  }
 
-  const filePath = `private/${fileName}`;
-
-  const { error } = await supabase.storage
-    .from("prompt-images")
-    .upload(filePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-    });
-
-  if (error) throw error;
-
-  // DB에는 전체 URL이 아니라 파일 키(예: uuid.webp)만 저장합니다.
-  return fileName;
-};
+  return data.key;
+}
 
