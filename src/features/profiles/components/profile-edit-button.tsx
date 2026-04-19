@@ -427,7 +427,11 @@ export default function ProfileEditButton({
 
                 {cooldownMessage ? (
                   <p className="text-gray-500">{cooldownMessage}</p>
-                ) : null}
+                ) : (
+                  <p className="text-gray-500">
+                    닉네임을 변경하면 60일 후에 다시 변경할 수 있어요.
+                  </p>
+                )}
               </div>
             </div>
 
