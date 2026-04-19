@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { Heart } from "lucide-react";
 import type { Prompt } from "@/features/prompts/types";
 import LikeButton from "./like-button";
 import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-image-url";
@@ -7,7 +8,7 @@ import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-imag
 type PromptCardProps = {
   prompt: Pick<
     Prompt,
-    "id" | "title" | "ai_model" | "sample_image_url" | "nickname"
+    "id" | "title" | "ai_model" | "sample_image_url" | "nickname" | "likes_count"
   > & { user_id?: string | null };
   href: string;
   showLike?: boolean;
@@ -23,6 +24,7 @@ export default function PromptCard({
   showAuthor = true,
 }: PromptCardProps) {
   const imageSrc = getPromptImagePublicUrl(prompt.sample_image_url);
+  const likesCount = Math.max(0, prompt.likes_count ?? 0);
 
   return (
     <div className="relative rounded-xl bg-white transition">
@@ -56,7 +58,20 @@ export default function PromptCard({
               {prompt.title}
             </h2>
           </Link>
-          {showLike && <LikeButton promptId={prompt.id} initialLiked={liked} />}
+          {showLike ? (
+            <LikeButton
+              promptId={prompt.id}
+              initialLiked={liked}
+              initialCount={likesCount}
+              showCount
+              size="sm"
+            />
+          ) : (
+            <div className="inline-flex items-center gap-1 rounded-full px-2 py-1 text-xs font-bold text-gray-500">
+              <Heart className="h-4 w-4" strokeWidth={2} />
+              <span className="tabular-nums">{likesCount.toLocaleString()}</span>
+            </div>
+          )}
         </div>
 
         {showAuthor ? (

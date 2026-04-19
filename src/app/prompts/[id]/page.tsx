@@ -149,6 +149,8 @@ export default async function PromptDetailPage({
             <LikeButton
               promptId={prompt.id}
               initialLiked={initialLiked}
+              initialCount={Math.max(0, prompt.likes_count ?? 0)}
+              showCount
               size="lg"
             />
           </div>

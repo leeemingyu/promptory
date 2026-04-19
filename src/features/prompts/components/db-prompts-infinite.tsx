@@ -13,6 +13,7 @@ type PromptListItem = {
   ai_model: string;
   sample_image_url: string | null;
   nickname: string;
+  likes_count: number | null;
 };
 
 type DbPromptsInfiniteProps = {

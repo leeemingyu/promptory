@@ -16,6 +16,7 @@ type PromptRow = {
   ai_model: string;
   before_image_url: string | null;
   sample_image_url: string | null;
+  likes_count: number | null;
   created_at: string;
 };
 
@@ -61,7 +62,7 @@ export async function getPrompts(options?: {
   let queryBuilder = supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at",
     );
 
   if (query) {
@@ -115,7 +116,7 @@ export async function getPromptsPage(options: {
 
   const supabase = await createClient();
   const selectFields =
-    "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at";
+    "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at";
 
   let queryBuilder = supabase.from("prompts").select(selectFields);
 
@@ -158,7 +159,7 @@ async function getPopularPromptsPublic(): Promise<PromptRow[]> {
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at",
     )
     .order("likes_count", { ascending: false })
     .order("created_at", { ascending: false })
@@ -186,6 +187,7 @@ type PromptCardRow = Pick<
   | "title"
   | "ai_model"
   | "sample_image_url"
+  | "likes_count"
   | "created_at"
 >;
 
@@ -203,7 +205,7 @@ export async function getPromptsByIdsPublic(
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, ai_model, sample_image_url, created_at",
+      "id, user_id, nickname, title, ai_model, sample_image_url, likes_count, created_at",
     )
     .in("id", unique)
     .order("created_at", { ascending: false })
@@ -231,7 +233,7 @@ export async function getPromptsByUserPublic(
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, ai_model, sample_image_url, created_at",
+      "id, user_id, nickname, title, ai_model, sample_image_url, likes_count, created_at",
     )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
@@ -310,7 +312,7 @@ export async function getPromptById(id: string): Promise<PromptRow | null> {
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at",
     )
     .eq("id", id)
     .maybeSingle();

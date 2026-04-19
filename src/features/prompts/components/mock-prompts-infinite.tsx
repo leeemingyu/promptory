@@ -15,7 +15,7 @@ type MockPrompt = {
   sample_image_url: string;
   created_at: string;
   nickname: string;
-  like_count: number;
+  likes_count: number;
 };
 
 type MockPromptsInfiniteProps = {
@@ -41,7 +41,7 @@ const generateMockPrompts = (count: number): MockPrompt[] =>
       sample_image_url: `https://picsum.photos/seed/prompt-${order}/600/800`,
       created_at: createdAt,
       nickname: `Creator ${((order - 1) % 20) + 1}`,
-      like_count: Math.max(0, 1000 - order * 3),
+      likes_count: Math.max(0, 1000 - order * 3),
     };
   });
 
@@ -69,7 +69,7 @@ export default function MockPromptsInfinite({
     });
 
     return sort === "popular"
-      ? filtered.sort((a, b) => b.like_count - a.like_count)
+      ? filtered.sort((a, b) => b.likes_count - a.likes_count)
       : sort === "oldest"
         ? filtered.sort(
             (a, b) =>
