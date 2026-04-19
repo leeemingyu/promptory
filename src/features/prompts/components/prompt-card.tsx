@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Prompt } from "@/features/prompts/types";
 import LikeButton from "./like-button";
+import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-image-url";
 
 type PromptCardProps = {
   prompt: Pick<
@@ -21,15 +22,17 @@ export default function PromptCard({
   liked = false,
   showAuthor = true,
 }: PromptCardProps) {
+  const imageSrc = getPromptImagePublicUrl(prompt.sample_image_url);
+
   return (
     <div className="relative rounded-xl bg-white transition">
       <Link
         href={href}
         className="group relative block aspect-3/4 overflow-hidden rounded-xl bg-gray-100"
       >
-        {prompt.sample_image_url ? (
+        {imageSrc ? (
           <Image
-            src={prompt.sample_image_url}
+            src={imageSrc}
             alt={prompt.title}
             fill
             className="h-full w-full object-cover"

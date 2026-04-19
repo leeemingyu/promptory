@@ -17,6 +17,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import PromptImageTabs from "@/features/prompts/components/prompt-image-tabs";
 import BackButton from "@/components/navigation/back-button";
+import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-image-url";
 
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
@@ -55,14 +56,14 @@ export async function generateMetadata({
       description:
         prompt.description || "상상하는 모든 스타일을 현실로, Promptory",
       url: `/prompts/${prompt.id}`,
-      images: [prompt.sample_image_url || "/og.png"],
+      images: [getPromptImagePublicUrl(prompt.sample_image_url) || "/og.png"],
       type: "article",
     },
     twitter: {
       title: `${prompt.title} | Promptory`,
       description:
         prompt.description || "상상하는 모든 스타일을 현실로, Promptory",
-      images: [prompt.sample_image_url || "/og.png"],
+      images: [getPromptImagePublicUrl(prompt.sample_image_url) || "/og.png"],
     },
   };
 }
@@ -93,6 +94,8 @@ export default async function PromptDetailPage({
   }
 
   const prompt = promptRow;
+  const beforeSrc = getPromptImagePublicUrl(prompt.before_image_url);
+  const afterSrc = getPromptImagePublicUrl(prompt.sample_image_url);
 
   const currentUserId = await getCurrentUserId();
   const canEdit = Boolean(currentUserId && currentUserId === prompt.user_id);
@@ -117,16 +120,16 @@ export default async function PromptDetailPage({
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="relative aspect-3/4 w-full max-h-140 overflow-hidden rounded-2xl bg-gray-100">
-          {prompt.before_image_url && prompt.sample_image_url ? (
+          {beforeSrc && afterSrc ? (
             <PromptImageTabs
-              beforeSrc={prompt.before_image_url}
-              afterSrc={prompt.sample_image_url}
+              beforeSrc={beforeSrc}
+              afterSrc={afterSrc}
               alt={prompt.title}
               className="absolute h-full w-full"
             />
-          ) : prompt.sample_image_url ? (
+          ) : afterSrc ? (
             <Image
-              src={prompt.sample_image_url}
+              src={afterSrc}
               alt={prompt.title}
               fill
               className="object-contain"

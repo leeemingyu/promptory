@@ -111,16 +111,22 @@ export async function updatePrompt(
   const supabase = createClient();
   const userId = options?.userId ?? (await requireCurrentUser()).id;
 
+  const payload: Record<string, unknown> = {
+    title: input.title,
+    prompt_text: input.prompt_text,
+    description: input.description || null,
+    ai_model: input.ai_model,
+  };
+  if (options && "beforeImageUrl" in options) {
+    payload.before_image_url = options.beforeImageUrl ?? null;
+  }
+  if (options && "afterImageUrl" in options) {
+    payload.sample_image_url = options.afterImageUrl ?? null;
+  }
+
   const { error } = await supabase
     .from("prompts")
-    .update({
-      title: input.title,
-      prompt_text: input.prompt_text,
-      description: input.description || null,
-      ai_model: input.ai_model,
-      before_image_url: options?.beforeImageUrl ?? null,
-      sample_image_url: options?.afterImageUrl ?? null,
-    })
+    .update(payload)
     .eq("id", promptId)
     .eq("user_id", userId);
 

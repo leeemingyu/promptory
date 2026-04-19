@@ -3,12 +3,27 @@ import { createClient } from "@/lib/supabase/client";
 const supabase = createClient();
 
 export const uploadImage = async (file: File) => {
-  const fileExt = file.name.split(".").pop()?.toLowerCase();
-  if (!fileExt) {
-    throw new Error("유효한 파일 확장자가 없습니다.");
+  const rawExt = file.name.split(".").pop()?.toLowerCase();
+  const ext =
+    rawExt ||
+    (file.type === "image/png"
+      ? "png"
+      : file.type === "image/jpeg"
+        ? "jpg"
+        : file.type === "image/webp"
+          ? "webp"
+          : "");
+
+  if (!ext) {
+    throw new Error("유효한 이미지 파일 확장자를 확인할 수 없어요.");
   }
 
-  const fileName = `${crypto.randomUUID()}.${fileExt}`;
+  // crop 단계에서 이미 uuid.webp 같은 파일명으로 만들어주기 때문에 기본은 그걸 유지합니다.
+  const fileName =
+    file.name && file.name.includes(".")
+      ? file.name
+      : `${crypto.randomUUID()}.${ext}`;
+
   const filePath = `private/${fileName}`;
 
   const { error } = await supabase.storage
@@ -20,9 +35,7 @@ export const uploadImage = async (file: File) => {
 
   if (error) throw error;
 
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("prompt-images").getPublicUrl(filePath);
-
-  return publicUrl;
+  // DB에는 전체 URL이 아니라 파일 키(예: uuid.webp)만 저장합니다.
+  return fileName;
 };
+

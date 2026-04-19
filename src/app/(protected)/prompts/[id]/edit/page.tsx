@@ -15,6 +15,7 @@ import {
 } from "@/utils/messages";
 import { uploadImage } from "@/features/prompts/services/upload-image";
 import { cropImageToAspect } from "@/features/prompts/services/crop-image";
+import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-image-url";
 import type { CreatePromptInput } from "@/features/prompts/types";
 import { DEFAULT_PROMPT_MODEL, PROMPT_MODEL_OPTIONS } from "@/features/prompts";
 import BackButton from "@/components/navigation/back-button";
@@ -59,6 +60,9 @@ export default function EditPromptPage() {
     before_image_url: "",
     after_image_url: "",
   });
+
+  const originalBeforeSrc = getPromptImagePublicUrl(originalBeforeUrl);
+  const originalAfterSrc = getPromptImagePublicUrl(originalAfterUrl);
 
   useEffect(() => {
     let isMounted = true;
@@ -382,10 +386,10 @@ export default function EditPromptPage() {
             </p>
           ) : null}
 
-          {beforePreviewUrl || originalBeforeUrl ? (
+          {beforePreviewUrl || originalBeforeSrc ? (
             <div className="relative mt-4 w-44 aspect-3/4 overflow-hidden rounded-lg bg-gray-100 sm:w-56">
               <Image
-                src={beforePreviewUrl || originalBeforeUrl}
+                src={beforePreviewUrl || originalBeforeSrc || ""}
                 alt="Before Preview"
                 fill
                 unoptimized
@@ -417,10 +421,10 @@ export default function EditPromptPage() {
             </p>
           ) : null}
 
-          {afterPreviewUrl || originalAfterUrl ? (
+          {afterPreviewUrl || originalAfterSrc ? (
             <div className="relative mt-4 w-44 aspect-3/4 overflow-hidden rounded-lg bg-gray-100 sm:w-56">
               <Image
-                src={afterPreviewUrl || originalAfterUrl}
+                src={afterPreviewUrl || originalAfterSrc || ""}
                 alt="After Preview"
                 fill
                 unoptimized

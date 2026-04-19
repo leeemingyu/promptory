@@ -180,10 +180,18 @@ export const getPopularPromptsCached = unstable_cache(
 
 type PromptCardRow = Pick<
   PromptRow,
-  "id" | "user_id" | "nickname" | "title" | "ai_model" | "sample_image_url" | "created_at"
+  | "id"
+  | "user_id"
+  | "nickname"
+  | "title"
+  | "ai_model"
+  | "sample_image_url"
+  | "created_at"
 >;
 
-export async function getPromptsByIdsPublic(ids: string[]): Promise<PromptCardRow[]> {
+export async function getPromptsByIdsPublic(
+  ids: string[],
+): Promise<PromptCardRow[]> {
   const unique = Array.from(new Set(ids)).filter((id) => UUID_REGEX.test(id));
   if (unique.length === 0) return [];
 
@@ -194,7 +202,9 @@ export async function getPromptsByIdsPublic(ids: string[]): Promise<PromptCardRo
 
   const { data, error } = await supabase
     .from("prompts")
-    .select("id, user_id, nickname, title, ai_model, sample_image_url, created_at")
+    .select(
+      "id, user_id, nickname, title, ai_model, sample_image_url, created_at",
+    )
     .in("id", unique)
     .order("created_at", { ascending: false })
     .limit(Math.min(200, unique.length));
@@ -220,7 +230,9 @@ export async function getPromptsByUserPublic(
 
   const { data, error } = await supabase
     .from("prompts")
-    .select("id, user_id, nickname, title, ai_model, sample_image_url, created_at")
+    .select(
+      "id, user_id, nickname, title, ai_model, sample_image_url, created_at",
+    )
     .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(Math.max(1, Math.min(200, limit)));
@@ -233,7 +245,9 @@ export async function getPromptsByUserPublic(
   return (data ?? []) as PromptCardRow[];
 }
 
-export async function getPromptsCountByUserPublic(userId: string): Promise<number> {
+export async function getPromptsCountByUserPublic(
+  userId: string,
+): Promise<number> {
   if (!UUID_REGEX.test(userId)) return 0;
 
   const supabase = createPublicClient(
