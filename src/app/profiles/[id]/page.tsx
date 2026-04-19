@@ -41,7 +41,7 @@ export default async function ProfilePage({
           fallback={
             <PromptCardGridSkeleton
               showAuthor={false}
-              gridClassName="grid grid-cols-2 gap-6 sm:grid-cols-3"
+              gridClassName="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3"
             />
           }
         >

@@ -13,7 +13,6 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
   return (
     <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white">
       <div className="border-b border-gray-100 px-6 py-4">
-        <h2 className="text-lg font-bold text-gray-900">사용자 랭킹</h2>
         <p className="mt-1 text-sm text-gray-500">
           랭킹은 매시간 정각에 바뀌어요. 좋아요 수와 서비스 기여도를 종합해서
           순위를 결정해요. 매시간 정각, 새롭게 업데이트되는 랭킹을 확인해
@@ -64,7 +63,8 @@ export default function UserRankingTable({ rows }: UserRankingTableProps) {
                       </Link>
                     ) : (
                       <div className="flex items-center gap-3">
-                        {row.profileImageUrl && row.profileImageUrl !== "default" ? (
+                        {row.profileImageUrl &&
+                        row.profileImageUrl !== "default" ? (
                           <ProfileAvatar
                             imageUrl={row.profileImageUrl}
                             imgClassName="h-8 w-8 rounded-full object-cover"

@@ -37,7 +37,7 @@ export default function MobileMenu({ isAuthed, profileId }: MobileMenuProps) {
         onClick={() => setOpen((prev) => !prev)}
         aria-expanded={open}
         aria-label={open ? "메뉴 닫기" : "메뉴 열기"}
-        className="cursor-pointer inline-flex h-10 w-10  active:scale-80 items-center justify-center rounded-lg bg-white text-gray-700 transition hover:bg-gray-50"
+        className="cursor-pointer inline-flex h-10 w-10 active:scale-80 items-center justify-center rounded-lg bg-white text-gray-700 transition hover:bg-gray-50"
       >
         {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -45,7 +45,7 @@ export default function MobileMenu({ isAuthed, profileId }: MobileMenuProps) {
       <div
         aria-hidden={!open}
         className={[
-          "fixed top-10 left-0 z-50 mt-2 w-screen overflow-hidden bg-white shadow-lg",
+          "fixed top-10 left-0 z-50 mt-2 w-full overflow-hidden bg-white shadow-lg",
           "transition-all duration-300 ease-in-out",
           open ? "max-h-125" : "max-h-0",
         ].join(" ")}

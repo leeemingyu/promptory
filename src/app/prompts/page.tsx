@@ -114,11 +114,6 @@ export default async function PromptsPage({ searchParams }: PromptsPageProps) {
             />
           ) : (
             <>
-              {/* <PromptsListSkeleton
-                sort={sort}
-                query={queryValue}
-                model={modelValue}
-              /> */}
               <Suspense
                 fallback={
                   <PromptsListSkeleton

@@ -84,13 +84,10 @@ export default function LikeButton({
       disabled={isLoading}
       aria-pressed={liked}
       aria-label="좋아요"
-      className={`relative inline-flex cursor-pointer items-center justify-center transition ${`group rounded-full ${buttonSizeClass} ${
-        liked ? "text-rose-600" : "text-gray-500 hover:text-rose-500"
+      className={`relative inline-flex cursor-pointer items-center justify-center hover:bg-gray-100 transition ${`group rounded-lg ${buttonSizeClass}  ${
+        liked ? "text-rose-600" : "text-gray-500"
       }`} ${isLoading ? "cursor-not-allowed opacity-70" : ""}`}
     >
-      <span className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-2 -translate-x-1/2 whitespace-nowrap rounded bg-black px-2 py-1 text-xs text-white opacity-0 transition-opacity group-hover:opacity-100">
-        {liked ? "좋아요 목록에서 제거" : "좋아요 목록에 추가"}
-      </span>
       <Heart
         className={iconSizeClass}
         strokeWidth={2}

@@ -55,9 +55,7 @@ export default function CreatePromptPage() {
     };
   }, [beforePreview, afterPreview]);
 
-  const handleBeforeChange = async (
-    e: React.ChangeEvent<HTMLInputElement>,
-  ) => {
+  const handleBeforeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     const token = (beforeTokenRef.current += 1);
@@ -165,7 +163,9 @@ export default function CreatePromptPage() {
         setImageError("결과 이미지를 업로드해주세요.");
       }
 
-      const targetId = !beforeImage ? "before-image-input" : "after-image-input";
+      const targetId = !beforeImage
+        ? "before-image-input"
+        : "after-image-input";
       document.getElementById(targetId)?.scrollIntoView({
         behavior: "smooth",
         block: "center",
@@ -207,7 +207,7 @@ export default function CreatePromptPage() {
   };
 
   return (
-    <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
+    <main className="mx-auto mb-20 max-w-2xl">
       <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 작성</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -291,7 +291,8 @@ export default function CreatePromptPage() {
         ) : null}
 
         <p className="text-sm text-gray-500">
-          업로드한 이미지는 <span className="font-semibold">3:4 비율로 자동 크롭</span>
+          업로드한 이미지는{" "}
+          <span className="font-semibold">3:4 비율로 자동 크롭</span>
           되어 저장돼요. 아래 미리보기 그대로 저장됩니다.
         </p>
 

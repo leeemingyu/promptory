@@ -33,13 +33,13 @@ export default async function ProfilePromptsSection({
     }
 
     return (
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3">
         {likedPrompts.map((prompt) => (
           <PromptCard
             key={prompt.id}
             prompt={prompt}
             href={`/prompts/${prompt.id}`}
-            showLike
+            showLike={false}
             liked
             showAuthor={false}
           />
@@ -50,7 +50,9 @@ export default async function ProfilePromptsSection({
 
   const [prompts, likedPromptIds] = await Promise.all([
     getPromptsByUserPublic(profileId),
-    viewerUserId ? getLikedPromptIds(viewerUserId) : Promise.resolve([] as string[]),
+    viewerUserId
+      ? getLikedPromptIds(viewerUserId)
+      : Promise.resolve([] as string[]),
   ]);
   const likedSet = new Set(likedPromptIds);
 
@@ -63,13 +65,13 @@ export default async function ProfilePromptsSection({
   }
 
   return (
-    <div className="grid grid-cols-2 gap-6 sm:grid-cols-3">
+    <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3">
       {prompts.map((prompt) => (
         <PromptCard
           key={prompt.id}
           prompt={prompt}
           href={`/prompts/${prompt.id}`}
-          showLike
+          showLike={false}
           liked={likedSet.has(prompt.id)}
           showAuthor={false}
         />

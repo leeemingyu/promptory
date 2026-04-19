@@ -45,8 +45,7 @@ export default async function PromptsListSection({
       sort={sort}
       pageSize={pageSize}
       likedIds={likedPromptIds}
-      showLike={true}
+      showLike={false}
     />
   );
 }
-

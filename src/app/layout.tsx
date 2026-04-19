@@ -24,6 +24,9 @@ export const metadata: Metadata = {
     "제미나이 활용법",
     "Promptory",
   ],
+  other: {
+    site_name: "Promptory",
+  },
   openGraph: {
     type: "website",
     locale: "ko_KR",

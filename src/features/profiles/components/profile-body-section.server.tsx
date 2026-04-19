@@ -22,7 +22,9 @@ export default async function ProfileBodySection({
   const viewerUserId = await getViewerUserId();
   const isMine = Boolean(viewerUserId && viewerUserId === profileId);
   const activeTab =
-    isMine && requestedTab === "liked" ? ("liked" as const) : ("posts" as const);
+    isMine && requestedTab === "liked"
+      ? ("liked" as const)
+      : ("posts" as const);
 
   const [postsCount, likedCount] = await Promise.all([
     getPromptsCountByUserPublic(profileId),
@@ -32,7 +34,7 @@ export default async function ProfileBodySection({
   const gridFallback = (
     <PromptCardGridSkeleton
       showAuthor={false}
-      gridClassName="grid grid-cols-2 gap-6 sm:grid-cols-3"
+      gridClassName="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3"
     />
   );
 
@@ -58,9 +60,15 @@ export default async function ProfileBodySection({
 
   return (
     <>
-      <div className="mb-5 flex items-end justify-between gap-3">
-        <h2 className="text-xl font-bold text-gray-900">작성한 프롬프트</h2>
-        <span className="text-sm text-gray-500">{postsCount}개</span>
+      <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+        <div className="flex items-center gap-2 bg-white p-1 text-sm">
+          <div className="rounded-full px-4 py-2 font-semibold transition bg-white text-gray-700">
+            작성한 글
+            <span className="ml-1 text-xs font-bold opacity-80">
+              {postsCount}
+            </span>
+          </div>
+        </div>
       </div>
 
       <Suspense fallback={gridFallback}>

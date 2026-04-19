@@ -121,11 +121,11 @@ export default function DbPromptsInfinite({
           {isNavigating ? (
             <PromptCardGridSkeleton
               showAuthor
-              gridClassName="grid grid-cols-2 gap-6 lg:grid-cols-3"
+              gridClassName="grid grid-cols-2 gap-x-3 gap-y-6 lg:grid-cols-3"
             />
           ) : (
             <>
-              <div className="grid grid-cols-2 gap-6 lg:grid-cols-3">
+              <div className="grid grid-cols-2 gap-x-3 gap-y-6 lg:grid-cols-3">
                 {items.map((prompt) => (
                   <PromptCard
                     key={prompt.id}

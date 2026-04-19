@@ -26,7 +26,7 @@ export default function PromptsListSkeleton({
       <PromptCardGridSkeleton
         count={9}
         showAuthor
-        gridClassName="grid grid-cols-2 gap-6 lg:grid-cols-3"
+        gridClassName="grid grid-cols-2 gap-x-3 gap-y-6 lg:grid-cols-3"
       />
     </>
   );

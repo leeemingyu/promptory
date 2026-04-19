@@ -7,7 +7,7 @@ type PromptCardGridSkeletonProps = {
 export default function PromptCardGridSkeleton({
   count = 9,
   showAuthor = true,
-  gridClassName = "grid grid-cols-2 gap-6 sm:grid-cols-3",
+  gridClassName = "grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3",
 }: PromptCardGridSkeletonProps) {
   return (
     <div className={gridClassName}>

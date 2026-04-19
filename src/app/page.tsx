@@ -20,7 +20,7 @@ export default async function HomePage() {
         <h1 className="mt-4 break-keep text-3xl font-bold text-black sm:text-4xl">
           창작의 완성도를 높여줄 프롬프트 아카이브
         </h1>
-        <p className="mx-auto mt-2 sm:mt-4 max-w-2xl break-keep text-3xl text-gray-500 sm:text-4xl font-bold">
+        <p className="md:mx-auto mt-2 sm:mt-4 max-w-2xl break-keep text-3xl text-gray-500 sm:text-4xl font-bold">
           프롬프토리
         </p>
       </section>
@@ -28,7 +28,7 @@ export default async function HomePage() {
       <div className="mb-6 flex flex-col items-start gap-10 sm:flex-row sm:items-center sm:justify-between">
         <Link
           href="/prompts"
-          className="order-1 rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 sm:order-2"
+          className="order-1 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 sm:order-2"
         >
           전체 프롬프트
         </Link>
@@ -40,19 +40,25 @@ export default async function HomePage() {
           아직 인기 프롬프트가 없습니다.
         </div>
       ) : (
-        <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="mb-8 md:mb-11 grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
           {prompts.map((prompt) => (
             <PromptCard
               key={prompt.id}
               prompt={prompt}
               href={`/prompts/${prompt.id}`}
-              showLike={true}
+              showLike={false}
               liked={likedSet.has(prompt.id)}
               showAuthor={false}
             />
           ))}
         </div>
       )}
+      <Link
+        href="/prompts"
+        className="absolute sm:left-1/2 sm:-translate-x-1/2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800"
+      >
+        전체 프롬프트
+      </Link>
     </main>
   );
 }

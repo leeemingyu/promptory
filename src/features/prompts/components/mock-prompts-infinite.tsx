@@ -30,7 +30,9 @@ const generateMockPrompts = (count: number): MockPrompt[] =>
   Array.from({ length: count }, (_, index) => {
     const order = index + 1;
     const model = PROMPT_MODEL_OPTIONS[index % PROMPT_MODEL_OPTIONS.length];
-    const createdAt = new Date(Date.now() - index * 1000 * 60 * 60).toISOString();
+    const createdAt = new Date(
+      Date.now() - index * 1000 * 60 * 60,
+    ).toISOString();
 
     return {
       id: `mock-${order}`,
@@ -73,11 +75,13 @@ export default function MockPromptsInfinite({
       : sort === "oldest"
         ? filtered.sort(
             (a, b) =>
-              new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+              new Date(a.created_at).getTime() -
+              new Date(b.created_at).getTime(),
           )
         : filtered.sort(
             (a, b) =>
-              new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+              new Date(b.created_at).getTime() -
+              new Date(a.created_at).getTime(),
           );
   }, [model, query, sort, totalCount]);
 
@@ -105,7 +109,11 @@ export default function MockPromptsInfinite({
     return () => observer.disconnect();
   }, [filteredPrompts.length, hasMore, pageSize]);
 
-  const buildHref = (next: { sort?: PromptSort; q?: string; model?: string }) => {
+  const buildHref = (next: {
+    sort?: PromptSort;
+    q?: string;
+    model?: string;
+  }) => {
     const params = new URLSearchParams();
     params.set("perf_test", "true");
     if (next.sort && next.sort !== "latest") params.set("sort", next.sort);
@@ -118,7 +126,9 @@ export default function MockPromptsInfinite({
   return (
     <>
       <div className="mb-4 flex w-full items-center justify-between">
-        <p className="text-sm text-gray-500">{filteredPrompts.length}개 프롬프트</p>
+        <p className="text-sm text-gray-500">
+          {filteredPrompts.length}개 프롬프트
+        </p>
         <div className="flex items-center gap-2">
           <span className="text-xs font-semibold text-gray-500">정렬</span>
           <SortSelect value={sort} query={query} model={model} perfTest />
@@ -131,7 +141,7 @@ export default function MockPromptsInfinite({
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 lg:grid-cols-4">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-6 sm:grid-cols-3 lg:grid-cols-4">
             {visiblePrompts.map((prompt) => (
               <PromptCard
                 key={prompt.id}
