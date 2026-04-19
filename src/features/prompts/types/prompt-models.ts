@@ -1,10 +1,14 @@
 export const PROMPT_MODEL_OPTIONS = [
-  "GEMINI",
   "GPT",
-  "Claude",
-  "Midjourney",
-  "Stable Diffusion",
-  "DALL-E",
+  "GEMINI",
+  "GROK",
+  "Seedream",
+  "Hunyuan",
+  "Wan",
+  "Flux",
+  "Qwen",
+  "Reve",
+  "Kling",
   "Etc",
 ] as const;
 
