@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -15,11 +15,10 @@ import {
   IMAGE_REQUIRED_MESSAGE,
 } from "@/utils/messages";
 import { uploadImage } from "@/features/prompts/services/upload-image";
+import { cropImageToAspect } from "@/features/prompts/services/crop-image";
 import type { CreatePromptInput } from "@/features/prompts/types";
-import {
-  DEFAULT_PROMPT_MODEL,
-  PROMPT_MODEL_OPTIONS,
-} from "@/features/prompts";
+import { DEFAULT_PROMPT_MODEL, PROMPT_MODEL_OPTIONS } from "@/features/prompts";
+import BackButton from "@/components/navigation/back-button";
 
 const TITLE_MAX = 20;
 const DESCRIPTION_MAX = 200;
@@ -30,7 +29,8 @@ type PromptFormEvent = React.ChangeEvent<
 
 const PERMISSION_DENIED_MESSAGE =
   "\ub0b4\uac00 \uc791\uc131\ud55c \ud504\ub86c\ud504\ud2b8\ub9cc \uc218\uc815\ud560 \uc218 \uc788\uc5b4\uc694.";
-const NOT_FOUND_MESSAGE = "\ud504\ub86c\ud504\ud2b8\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc5b4\uc694.";
+const NOT_FOUND_MESSAGE =
+  "\ud504\ub86c\ud504\ud2b8\ub97c \ucc3e\uc744 \uc218 \uc5c6\uc5b4\uc694.";
 export default function EditPromptPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
@@ -41,6 +41,8 @@ export default function EditPromptPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
   const [imageFile, setImageFile] = useState<File | null>(null);
+  const [isProcessingImage, setIsProcessingImage] = useState(false);
+  const imageTokenRef = useRef(0);
   const [previewUrl, setPreviewUrl] = useState<string>("");
   const [originalImageUrl, setOriginalImageUrl] = useState<string>("");
   const [showImageError, setShowImageError] = useState(false);
@@ -137,16 +139,33 @@ export default function EditPromptPage() {
     };
   }, [previewUrl]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    const token = (imageTokenRef.current += 1);
 
-    setImageFile(file);
     setShowImageError(false);
-    setPreviewUrl((prev) => {
-      if (prev) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(file);
-    });
+    setIsProcessingImage(true);
+
+    try {
+      const cropped = await cropImageToAspect(file, { aspect: 3 / 4 });
+      if (imageTokenRef.current !== token) return;
+
+      setImageFile(cropped);
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(cropped);
+      });
+    } catch {
+      if (imageTokenRef.current !== token) return;
+      setImageFile(null);
+      setPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return "";
+      });
+    } finally {
+      if (imageTokenRef.current === token) setIsProcessingImage(false);
+    }
   };
 
   const handleChange = (e: PromptFormEvent) => {
@@ -170,6 +189,10 @@ export default function EditPromptPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (isProcessingImage) {
+      alert("이미지를 3:4 비율로 맞추는 중이에요. 잠시만 기다려주세요.");
+      return;
+    }
     if (!currentUserId || !promptId) {
       alert(LOGIN_REQUIRED_MESSAGE);
       return;
@@ -206,6 +229,9 @@ export default function EditPromptPage() {
 
   return (
     <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
+      <div className="mb-4">
+        <BackButton confirmMessage="지금 돌아가면 저장되지 않아요. 그래도 나갈까요?" />
+      </div>
       <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 수정</h1>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -285,6 +311,14 @@ export default function EditPromptPage() {
             onChange={handleFileChange}
             className="block w-full cursor-pointer text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800"
           />
+          <p className="mt-2 text-sm text-gray-500">
+            업로드한 이미지는 3:4 비율로 자동 크롭되어 저장돼요.
+          </p>
+          {isProcessingImage ? (
+            <p className="mt-2 text-sm text-gray-500">
+              3:4 비율로 이미지 처리 중...
+            </p>
+          ) : null}
           {showImageError && !(previewUrl || originalImageUrl) && (
             <p className="mt-2 text-xs text-rose-600">
               {IMAGE_REQUIRED_MESSAGE}
@@ -292,13 +326,13 @@ export default function EditPromptPage() {
           )}
 
           {(previewUrl || originalImageUrl) && (
-            <div className="relative mt-4 h-40 w-40">
+            <div className="relative mt-4 w-44 aspect-3/4 overflow-hidden rounded-lg bg-gray-100 sm:w-56">
               <Image
                 src={previewUrl || originalImageUrl}
                 alt="Preview"
                 fill
                 unoptimized
-                className="rounded-lg border object-cover"
+                className="h-full w-full object-cover"
               />
             </div>
           )}
@@ -306,9 +340,9 @@ export default function EditPromptPage() {
 
         <button
           type="submit"
-          disabled={isLoading}
+          disabled={isLoading || isProcessingImage}
           className={`w-full cursor-pointer rounded-xl py-4 text-lg font-bold text-white transition ${
-            isLoading
+            isLoading || isProcessingImage
               ? "cursor-not-allowed bg-gray-400"
               : "bg-black shadow-lg hover:bg-gray-800"
           }`}
@@ -319,5 +353,3 @@ export default function EditPromptPage() {
     </main>
   );
 }
-
-

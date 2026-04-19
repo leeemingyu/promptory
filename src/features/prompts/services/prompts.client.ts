@@ -18,6 +18,7 @@ type PromptEditRow = {
   prompt_text: string;
   description: string | null;
   ai_model: string;
+  before_image_url: string | null;
   sample_image_url: string | null;
 };
 
@@ -53,7 +54,7 @@ export async function getPromptForEdit(
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, title, prompt_text, description, ai_model, sample_image_url",
+      "id, user_id, title, prompt_text, description, ai_model, before_image_url, sample_image_url",
     )
     .eq("id", promptId)
     .maybeSingle();
@@ -68,7 +69,7 @@ export async function getPromptForEdit(
 
 export async function createPrompt(
   input: CreatePromptInput,
-  options?: { imageUrl?: string | null; user?: User },
+  options?: { beforeImageUrl: string; afterImageUrl: string; user?: User },
 ) {
   const supabase = createClient();
   const user = options?.user ?? (await requireCurrentUser());
@@ -88,7 +89,8 @@ export async function createPrompt(
     prompt_text: input.prompt_text,
     description: input.description || null,
     ai_model: input.ai_model,
-    sample_image_url: options?.imageUrl || null,
+    sample_image_url: options?.afterImageUrl,
+    before_image_url: options?.beforeImageUrl,
   });
 
   if (error) {
@@ -164,5 +166,3 @@ export async function toggleLike(promptId: string, nextLiked: boolean) {
     }
   }
 }
-
-

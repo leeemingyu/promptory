@@ -6,6 +6,7 @@ export interface Prompt {
   description?: string | null;
   ai_model: string;
   username: string;
+  before_image_url?: string | null;
   sample_image_url?: string | null;
   created_at: string;
   instagram_url?: string | null;

@@ -3,7 +3,8 @@ export interface CreatePromptInput {
   prompt_text: string;
   description: string;
   ai_model: string;
-  sample_image_url?: string | null;
+  before_image_url: string;
+  after_image_url: string;
 }
 
 export type UpdatePromptInput = Partial<CreatePromptInput>;

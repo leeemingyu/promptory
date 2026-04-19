@@ -15,7 +15,8 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ChevronLeft } from "lucide-react";
+import PromptImageTabs from "@/features/prompts/components/prompt-image-tabs";
+import BackButton from "@/components/navigation/back-button";
 
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
@@ -104,11 +105,11 @@ export default async function PromptDetailPage({
     <main className="mx-auto max-w-6xl md:p-6">
       <div className="mb-6">
         <div className="flex flex-wrap items-center gap-2">
+          <BackButton />
           <Link
             href={browseHref}
-            className="inline-flex items-center rounded-lg text-gray-700 border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-50"
+            className="inline-flex items-center rounded-lg text-gray-100 bg-gray-900 border border-gray-200 px-3 py-2 text-sm font-semibold transition hover:bg-gray-800"
           >
-            <ChevronLeft size={18} />
             프롬프트 목록
           </Link>
         </div>
@@ -116,7 +117,14 @@ export default async function PromptDetailPage({
 
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="relative aspect-3/4 w-full max-h-140 overflow-hidden rounded-2xl bg-gray-100">
-          {prompt.sample_image_url ? (
+          {prompt.before_image_url && prompt.sample_image_url ? (
+            <PromptImageTabs
+              beforeSrc={prompt.before_image_url}
+              afterSrc={prompt.sample_image_url}
+              alt={prompt.title}
+              className="absolute h-full w-full"
+            />
+          ) : prompt.sample_image_url ? (
             <Image
               src={prompt.sample_image_url}
               alt={prompt.title}

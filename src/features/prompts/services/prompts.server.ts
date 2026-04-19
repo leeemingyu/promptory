@@ -14,6 +14,7 @@ type PromptRow = {
   prompt_text: string;
   description: string | null;
   ai_model: string;
+  before_image_url: string | null;
   sample_image_url: string | null;
   created_at: string;
 };
@@ -60,7 +61,7 @@ export async function getPrompts(options?: {
   let queryBuilder = supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
     );
 
   if (query) {
@@ -114,7 +115,7 @@ export async function getPromptsPage(options: {
 
   const supabase = await createClient();
   const selectFields =
-    "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at";
+    "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at";
 
   let queryBuilder = supabase.from("prompts").select(selectFields);
 
@@ -157,7 +158,7 @@ async function getPopularPromptsPublic(): Promise<PromptRow[]> {
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
     )
     .order("likes_count", { ascending: false })
     .order("created_at", { ascending: false })
@@ -295,7 +296,7 @@ export async function getPromptById(id: string): Promise<PromptRow | null> {
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, sample_image_url, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, created_at",
     )
     .eq("id", id)
     .maybeSingle();
