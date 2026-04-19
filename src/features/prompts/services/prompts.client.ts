@@ -102,7 +102,11 @@ export async function createPrompt(
 export async function updatePrompt(
   promptId: string,
   input: CreatePromptInput,
-  options?: { imageUrl?: string | null; userId?: string },
+  options?: {
+    beforeImageUrl?: string | null;
+    afterImageUrl?: string | null;
+    userId?: string;
+  },
 ) {
   const supabase = createClient();
   const userId = options?.userId ?? (await requireCurrentUser()).id;
@@ -114,7 +118,8 @@ export async function updatePrompt(
       prompt_text: input.prompt_text,
       description: input.description || null,
       ai_model: input.ai_model,
-      sample_image_url: options?.imageUrl || null,
+      before_image_url: options?.beforeImageUrl ?? null,
+      sample_image_url: options?.afterImageUrl ?? null,
     })
     .eq("id", promptId)
     .eq("user_id", userId);

@@ -12,7 +12,6 @@ import {
 import {
   LOGIN_REQUIRED_MESSAGE,
   UPDATE_FAILED_MESSAGE,
-  IMAGE_REQUIRED_MESSAGE,
 } from "@/utils/messages";
 import { uploadImage } from "@/features/prompts/services/upload-image";
 import { cropImageToAspect } from "@/features/prompts/services/crop-image";
@@ -40,18 +39,25 @@ export default function EditPromptPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isFetching, setIsFetching] = useState(true);
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [isProcessingImage, setIsProcessingImage] = useState(false);
-  const imageTokenRef = useRef(0);
-  const [previewUrl, setPreviewUrl] = useState<string>("");
-  const [originalImageUrl, setOriginalImageUrl] = useState<string>("");
-  const [showImageError, setShowImageError] = useState(false);
+  const [beforeImageFile, setBeforeImageFile] = useState<File | null>(null);
+  const [afterImageFile, setAfterImageFile] = useState<File | null>(null);
+  const [isProcessingBefore, setIsProcessingBefore] = useState(false);
+  const [isProcessingAfter, setIsProcessingAfter] = useState(false);
+  const beforeTokenRef = useRef(0);
+  const afterTokenRef = useRef(0);
+  const [beforePreviewUrl, setBeforePreviewUrl] = useState<string>("");
+  const [afterPreviewUrl, setAfterPreviewUrl] = useState<string>("");
+  const [originalBeforeUrl, setOriginalBeforeUrl] = useState<string>("");
+  const [originalAfterUrl, setOriginalAfterUrl] = useState<string>("");
+  const [showBeforeError, setShowBeforeError] = useState(false);
+  const [showAfterError, setShowAfterError] = useState(false);
   const [formData, setFormData] = useState<CreatePromptInput>({
     title: "",
     prompt_text: "",
     description: "",
     ai_model: DEFAULT_PROMPT_MODEL,
-    sample_image_url: null,
+    before_image_url: "",
+    after_image_url: "",
   });
 
   useEffect(() => {
@@ -113,9 +119,11 @@ export default function EditPromptPage() {
           prompt_text: promptRow.prompt_text,
           description: promptRow.description ?? "",
           ai_model: promptRow.ai_model,
-          sample_image_url: promptRow.sample_image_url ?? null,
+          before_image_url: "",
+          after_image_url: "",
         });
-        setOriginalImageUrl(promptRow.sample_image_url ?? "");
+        setOriginalBeforeUrl(promptRow.before_image_url ?? "");
+        setOriginalAfterUrl(promptRow.sample_image_url ?? "");
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : UPDATE_FAILED_MESSAGE;
@@ -135,36 +143,66 @@ export default function EditPromptPage() {
 
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (beforePreviewUrl) URL.revokeObjectURL(beforePreviewUrl);
+      if (afterPreviewUrl) URL.revokeObjectURL(afterPreviewUrl);
     };
-  }, [previewUrl]);
+  }, [beforePreviewUrl, afterPreviewUrl]);
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleBeforeChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const token = (imageTokenRef.current += 1);
+    const token = (beforeTokenRef.current += 1);
 
-    setShowImageError(false);
-    setIsProcessingImage(true);
+    setShowBeforeError(false);
+    setIsProcessingBefore(true);
 
     try {
       const cropped = await cropImageToAspect(file, { aspect: 3 / 4 });
-      if (imageTokenRef.current !== token) return;
+      if (beforeTokenRef.current !== token) return;
 
-      setImageFile(cropped);
-      setPreviewUrl((prev) => {
+      setBeforeImageFile(cropped);
+      setBeforePreviewUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return URL.createObjectURL(cropped);
       });
     } catch {
-      if (imageTokenRef.current !== token) return;
-      setImageFile(null);
-      setPreviewUrl((prev) => {
+      if (beforeTokenRef.current !== token) return;
+      setBeforeImageFile(null);
+      setBeforePreviewUrl((prev) => {
         if (prev) URL.revokeObjectURL(prev);
         return "";
       });
     } finally {
-      if (imageTokenRef.current === token) setIsProcessingImage(false);
+      if (beforeTokenRef.current === token) setIsProcessingBefore(false);
+    }
+  };
+
+  const handleAfterChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const token = (afterTokenRef.current += 1);
+
+    setShowAfterError(false);
+    setIsProcessingAfter(true);
+
+    try {
+      const cropped = await cropImageToAspect(file, { aspect: 3 / 4 });
+      if (afterTokenRef.current !== token) return;
+
+      setAfterImageFile(cropped);
+      setAfterPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return URL.createObjectURL(cropped);
+      });
+    } catch {
+      if (afterTokenRef.current !== token) return;
+      setAfterImageFile(null);
+      setAfterPreviewUrl((prev) => {
+        if (prev) URL.revokeObjectURL(prev);
+        return "";
+      });
+    } finally {
+      if (afterTokenRef.current === token) setIsProcessingAfter(false);
     }
   };
 
@@ -189,7 +227,7 @@ export default function EditPromptPage() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (isProcessingImage) {
+    if (isProcessingBefore || isProcessingAfter) {
       alert("이미지를 3:4 비율로 맞추는 중이에요. 잠시만 기다려주세요.");
       return;
     }
@@ -197,8 +235,21 @@ export default function EditPromptPage() {
       alert(LOGIN_REQUIRED_MESSAGE);
       return;
     }
-    if (!imageFile && !originalImageUrl) {
-      setShowImageError(true);
+    if (!beforeImageFile && !originalBeforeUrl) {
+      setShowBeforeError(true);
+    }
+    if (!afterImageFile && !originalAfterUrl) {
+      setShowAfterError(true);
+    }
+    if ((!beforeImageFile && !originalBeforeUrl) || (!afterImageFile && !originalAfterUrl)) {
+      const targetId =
+        !beforeImageFile && !originalBeforeUrl
+          ? "before-image-input"
+          : "after-image-input";
+      document.getElementById(targetId)?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
       return;
     }
 
@@ -206,11 +257,14 @@ export default function EditPromptPage() {
 
     try {
       const user = await requireCurrentUser();
-      let finalImageUrl = originalImageUrl;
-      if (imageFile) finalImageUrl = await uploadImage(imageFile);
+      let finalBeforeUrl = originalBeforeUrl;
+      let finalAfterUrl = originalAfterUrl;
+      if (beforeImageFile) finalBeforeUrl = await uploadImage(beforeImageFile);
+      if (afterImageFile) finalAfterUrl = await uploadImage(afterImageFile);
 
       await updatePrompt(promptId, formData, {
-        imageUrl: finalImageUrl || null,
+        beforeImageUrl: finalBeforeUrl || null,
+        afterImageUrl: finalAfterUrl || null,
         userId: user.id,
       });
 
@@ -301,48 +355,86 @@ export default function EditPromptPage() {
           />
         </div>
 
+        <p className="text-sm text-gray-500">
+          업로드한 이미지는 <span className="font-semibold">3:4 비율로 자동 크롭</span>
+          되어 저장돼요. 아래 미리보기 그대로 저장됩니다.
+        </p>
+
         <div className="rounded-xl border-2 border-dashed border-gray-200 p-6">
           <label className="mb-2 block font-semibold text-gray-700">
-            결과 이미지
+            원본 이미지 (Before)
           </label>
           <input
+            id="before-image-input"
             type="file"
             accept="image/*"
-            onChange={handleFileChange}
-            className="block w-full cursor-pointer text-sm text-gray-500 file:mr-4 file:rounded-full file:border-0 file:bg-black file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-gray-800"
+            onChange={handleBeforeChange}
+            className="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
           />
-          <p className="mt-2 text-sm text-gray-500">
-            업로드한 이미지는 3:4 비율로 자동 크롭되어 저장돼요.
-          </p>
-          {isProcessingImage ? (
-            <p className="mt-2 text-sm text-gray-500">
+          {isProcessingBefore ? (
+            <p className="mt-3 text-sm text-gray-500">
               3:4 비율로 이미지 처리 중...
             </p>
           ) : null}
-          {showImageError && !(previewUrl || originalImageUrl) && (
-            <p className="mt-2 text-xs text-rose-600">
-              {IMAGE_REQUIRED_MESSAGE}
+          {showBeforeError && !(beforePreviewUrl || originalBeforeUrl) ? (
+            <p className="mt-3 text-sm font-semibold text-rose-600">
+              원본 이미지를 업로드해주세요.
             </p>
-          )}
+          ) : null}
 
-          {(previewUrl || originalImageUrl) && (
+          {beforePreviewUrl || originalBeforeUrl ? (
             <div className="relative mt-4 w-44 aspect-3/4 overflow-hidden rounded-lg bg-gray-100 sm:w-56">
               <Image
-                src={previewUrl || originalImageUrl}
-                alt="Preview"
+                src={beforePreviewUrl || originalBeforeUrl}
+                alt="Before Preview"
                 fill
                 unoptimized
                 className="h-full w-full object-cover"
               />
             </div>
-          )}
+          ) : null}
+        </div>
+
+        <div className="rounded-xl border-2 border-dashed border-gray-200 p-6">
+          <label className="mb-2 block font-semibold text-gray-700">
+            결과 이미지 (After)
+          </label>
+          <input
+            id="after-image-input"
+            type="file"
+            accept="image/*"
+            onChange={handleAfterChange}
+            className="block w-full rounded-lg border border-gray-300 bg-white p-2 text-sm text-gray-700 file:mr-3 file:rounded-md file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-semibold file:text-gray-700 hover:file:bg-gray-200"
+          />
+          {isProcessingAfter ? (
+            <p className="mt-3 text-sm text-gray-500">
+              3:4 비율로 이미지 처리 중...
+            </p>
+          ) : null}
+          {showAfterError && !(afterPreviewUrl || originalAfterUrl) ? (
+            <p className="mt-3 text-sm font-semibold text-rose-600">
+              결과 이미지를 업로드해주세요.
+            </p>
+          ) : null}
+
+          {afterPreviewUrl || originalAfterUrl ? (
+            <div className="relative mt-4 w-44 aspect-3/4 overflow-hidden rounded-lg bg-gray-100 sm:w-56">
+              <Image
+                src={afterPreviewUrl || originalAfterUrl}
+                alt="After Preview"
+                fill
+                unoptimized
+                className="h-full w-full object-cover"
+              />
+            </div>
+          ) : null}
         </div>
 
         <button
           type="submit"
-          disabled={isLoading || isProcessingImage}
+          disabled={isLoading || isProcessingBefore || isProcessingAfter}
           className={`w-full cursor-pointer rounded-xl py-4 text-lg font-bold text-white transition ${
-            isLoading || isProcessingImage
+            isLoading || isProcessingBefore || isProcessingAfter
               ? "cursor-not-allowed bg-gray-400"
               : "bg-black shadow-lg hover:bg-gray-800"
           }`}
