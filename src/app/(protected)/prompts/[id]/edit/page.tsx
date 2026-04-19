@@ -35,6 +35,12 @@ export default function EditPromptPage() {
   const router = useRouter();
   const params = useParams<{ id: string }>();
   const promptId = params.id ?? "";
+  const initialFormRef = useRef<{
+    title: string;
+    prompt_text: string;
+    description: string;
+    ai_model: string;
+  } | null>(null);
 
   const [isAuthReady, setIsAuthReady] = useState(false);
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
@@ -126,6 +132,12 @@ export default function EditPromptPage() {
           before_image_url: "",
           after_image_url: "",
         });
+        initialFormRef.current = {
+          title: promptRow.title,
+          prompt_text: promptRow.prompt_text,
+          description: promptRow.description ?? "",
+          ai_model: promptRow.ai_model,
+        };
         setOriginalBeforeUrl(promptRow.before_image_url ?? "");
         setOriginalAfterUrl(promptRow.sample_image_url ?? "");
       } catch (error: unknown) {
@@ -288,10 +300,27 @@ export default function EditPromptPage() {
 
   if (!isAuthReady || !currentUserId || isFetching) return null;
 
+  const isDirty = (() => {
+    const initial = initialFormRef.current;
+    if (!initial) return false;
+    if (beforeImageFile || afterImageFile) return true;
+    if (formData.title !== initial.title) return true;
+    if (formData.prompt_text !== initial.prompt_text) return true;
+    if (formData.description !== initial.description) return true;
+    if (formData.ai_model !== initial.ai_model) return true;
+    return false;
+  })();
+
   return (
     <main className="mx-auto mb-20 mt-10 max-w-2xl px-4">
       <div className="mb-4">
-        <BackButton confirmMessage="지금 돌아가면 저장되지 않아요. 그래도 나갈까요?" />
+        <BackButton
+          confirmMessage={
+            isDirty
+              ? "지금 돌아가면 저장되지 않은 변경사항이 사라질 수 있어요. 그래도 나갈까요?"
+              : undefined
+          }
+        />
       </div>
       <h1 className="mb-8 text-3xl font-bold text-black">프롬프트 수정</h1>
 
