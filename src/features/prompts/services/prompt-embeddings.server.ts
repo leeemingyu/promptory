@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createAdminClient } from "@/lib/supabase/admin";
+import type { FeatureExtractionPipelineType, Tensor } from "@xenova/transformers";
 
 const MODEL_ID = "Xenova/all-MiniLM-L6-v2";
 const EMBEDDING_DIM = 384;
@@ -14,15 +15,9 @@ type EmbeddingSource = {
   embedding: unknown;
 };
 
-type TransformerEmbedding = {
-  data: Float32Array | number[];
-};
+let extractorPromise: Promise<FeatureExtractionPipelineType> | null = null;
 
-let extractorPromise: Promise<
-  (text: string, options?: Record<string, unknown>) => Promise<TransformerEmbedding>
-> | null = null;
-
-async function getExtractor() {
+async function getExtractor(): Promise<FeatureExtractionPipelineType> {
   if (!extractorPromise) {
     extractorPromise = (async () => {
       const { pipeline, env } = await import("@xenova/transformers");
@@ -70,8 +65,12 @@ function normalizeVectorValue(value: unknown): string | null {
 
 async function embedText(text: string): Promise<number[]> {
   const extractor = await getExtractor();
-  const output = await extractor(text, { pooling: "mean", normalize: true });
-  const arr = Array.from(output.data as Float32Array | number[]);
+  const output = (await extractor(text, {
+    pooling: "mean",
+    normalize: true,
+  })) as Tensor;
+  const data = output.data as unknown as ArrayLike<number>;
+  const arr = Array.from(data, (v) => Number(v));
 
   if (arr.length !== EMBEDDING_DIM) {
     throw new Error(
@@ -109,4 +108,3 @@ export async function getOrCreatePromptEmbeddingVectorLiteral(
 
   return literal;
 }
-
