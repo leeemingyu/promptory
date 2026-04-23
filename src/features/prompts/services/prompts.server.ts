@@ -20,6 +20,10 @@ type PromptRow = {
   created_at: string;
 };
 
+export type PromptDetailRow = PromptRow & {
+  embedding: unknown;
+};
+
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
@@ -306,13 +310,15 @@ export async function getPromptModels(): Promise<string[]> {
   return Array.from(models).sort((a, b) => a.localeCompare(b));
 }
 
-export async function getPromptById(id: string): Promise<PromptRow | null> {
+export async function getPromptById(
+  id: string,
+): Promise<PromptDetailRow | null> {
   if (!UUID_REGEX.test(id)) return null;
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("prompts")
     .select(
-      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at",
+      "id, user_id, nickname, title, prompt_text, description, ai_model, before_image_url, sample_image_url, likes_count, created_at, embedding",
     )
     .eq("id", id)
     .maybeSingle();
@@ -322,7 +328,7 @@ export async function getPromptById(id: string): Promise<PromptRow | null> {
     throw new Error(LOAD_FAILED_MESSAGE);
   }
 
-  return data ?? null;
+  return (data ?? null) as PromptDetailRow | null;
 }
 
 export async function isPromptLiked(

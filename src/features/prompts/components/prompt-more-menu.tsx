@@ -114,7 +114,7 @@ export default function PromptMoreMenu({
         <div
           role="menu"
           aria-label="게시글 메뉴"
-          className="absolute right-0 top-full z-200 mt-2 w-30 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-lg"
+          className="absolute right-0 top-full z-200 mt-2 overflow-hidden rounded-2xl border border-gray-200 bg-white p-2 shadow-lg whitespace-nowrap"
         >
           {canEdit ? (
             <>

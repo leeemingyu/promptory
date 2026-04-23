@@ -18,6 +18,7 @@ import { notFound } from "next/navigation";
 import PromptImageTabs from "@/features/prompts/components/prompt-image-tabs";
 import BackButton from "@/components/navigation/back-button";
 import { getPromptImagePublicUrl } from "@/features/prompts/services/prompt-image-url";
+import RecommendedPromptsSection from "@/features/prompts/components/recommended-prompts-section.server";
 
 interface PromptDetailPageProps {
   params: Promise<{ id: string }>;
@@ -197,6 +198,8 @@ export default async function PromptDetailPage({
           )}
         </div>
       </div>
+
+      <RecommendedPromptsSection promptId={prompt.id} count={5} />
     </main>
   );
 }

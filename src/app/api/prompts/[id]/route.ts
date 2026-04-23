@@ -69,6 +69,7 @@ export async function PATCH(
       ai_model: body.ai_model,
       before_image_url: nextBefore,
       sample_image_url: nextAfter,
+      embedding: null,
     })
     .eq("id", id)
     .eq("user_id", user.id);
