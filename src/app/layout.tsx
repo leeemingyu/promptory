@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import "./globals.css";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import { Analytics } from "@vercel/analytics/next";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://prompt-ory.vercel.app/"),
@@ -66,6 +67,7 @@ export default function RootLayout({
         <Header />
         <div className="p-5">{children}</div>
         <Footer />
+        <Analytics />
       </body>
     </html>
   );
